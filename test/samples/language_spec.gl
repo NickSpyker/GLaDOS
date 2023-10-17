@@ -41,7 +41,7 @@ definition <NAME>(<NAME>: <TYPE>, ...) -> <TYPE>
 {
     soit x: entier = 0 
 
-    retourner TOKEN
+    resultat TOKEN
 }
 
 si TOKEN alors {
@@ -63,3 +63,7 @@ pour TOKEN tant que TOKEN tels que TOKEN alors {
 faire {
     ...
 } tant que TOKEN
+
+boucler {
+    arreter
+}
