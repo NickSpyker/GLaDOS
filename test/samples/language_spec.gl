@@ -1,0 +1,65 @@
+### TOKEN DEFINITION
+<NAME> : alphanumeric expression /[a-zA-Z0-9_]+/
+
+<TYPE> :
+    chaine
+    entier
+    flottant
+    caractere
+    <TYPE>[]...
+
+<OP> :
+    sommer
+    multiplier
+    soustraire
+    diviser
+    +
+    -
+    *
+    /
+    %
+    et
+    ou
+    non
+    <
+    <=
+    >
+    >=
+    ==
+    non=
+
+<SEMANTIC> :
+    {}
+    ()
+    []
+    :
+    ,
+    ->
+
+# BLOCK DEFINITION
+definition <NAME>(<NAME>: <TYPE>, ...) -> <TYPE>
+{
+    soit x: entier = 0 
+
+    retourner TOKEN
+}
+
+si TOKEN alors {
+    ...
+} sinon si TOKEN alors {
+    ...
+} sinon {
+    ...
+}
+
+tant que TOKEN {
+    ...
+}
+
+pour TOKEN tant que TOKEN tels que TOKEN alors {
+    ...
+}
+
+faire {
+    ...
+} tant que TOKEN
