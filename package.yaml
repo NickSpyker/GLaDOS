@@ -17,6 +17,7 @@ ghc-options:
 
 library:
   source-dirs:
+    - src
     - src/vm
     - src/strain
     - src/interpreter
