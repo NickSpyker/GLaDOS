@@ -1,7 +1,7 @@
-module Main (main) where
+module Main (main, handleArgs, launchInterpreter, launchCompiler) where
 
 
-import Lib (getFilesContents, haveElemOf, rmOcc)
+import Lib (getFilesContent, haveElemOf, rmOcc)
 import System.Environment (getArgs)
 import Usage (printHelp)
 
@@ -15,9 +15,9 @@ handleArgs [] = launchInterpreter []
 handleArgs input
   | input `haveElemOf` ["-h", "--help"] = printHelp
   | input `haveElemOf` ["-i", "--interpret"] =
-      getFilesContents (input `rmOcc` ["-i", "--interpret"]) >>= either putStrLn launchInterpreter
+      getFilesContent (input `rmOcc` ["-i", "--interpret"]) >>= either putStrLn launchInterpreter
   | otherwise =
-      getFilesContents input >>= either putStrLn launchCompiler
+      getFilesContent input >>= either putStrLn launchCompiler
 
 
 launchInterpreter :: [String] -> IO ()

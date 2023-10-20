@@ -1,4 +1,4 @@
-module Lib (readToString, getFilesContents, haveElemOf, rmOcc) where
+module Lib (readToString, getFilesContent, haveElemOf, rmOcc) where
 
 
 import Control.Exception (catch, IOException)
@@ -9,8 +9,8 @@ readToString filepath =
   (Right <$> readFile filepath) `catch` (\e -> return $ Left $ show (e :: IOException))
 
 
-getFilesContents :: [String] -> IO (Either String [String])
-getFilesContents paths =
+getFilesContent :: [String] -> IO (Either String [String])
+getFilesContent paths =
   sequenceA <$> traverse readToString paths
 
 
