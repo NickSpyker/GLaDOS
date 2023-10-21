@@ -1,7 +1,7 @@
 module Lexer (Token(..), tokenize) where
 
 
-import Lib (isNumber, isNumberOrDot, extractBtwQuot)
+import Lib (isNumber, isNumberOrDot, extractBtwQuot, trim)
 import Data.Char (isAlphaNum)
 import Data (Literal(..))
 
@@ -14,10 +14,9 @@ data Token
   | OpCrch      -- '['
   | ClCrch      -- ']
   | SmCol       -- ';'
+  | Col         -- ':'
   | Dot         -- '.'
   | Com         -- ','
-  | Apo         -- '''
-  | Quot        -- '"'
   | BckSlsh     -- '\'
   | Add         -- '+'
   | Sub         -- '-'
@@ -58,20 +57,20 @@ type ParserLexer = String -> Maybe (Token, String)
 
 
 tokenize :: String -> Either String [Token]
-tokenize = tokenize' [
+tokenize buffer = tokenize' [
     parseBasicToken,
     parseWordToken,
     parseLitToken,
     parseIdeToken
   ]
-  []
+  [] $ trim buffer
   where
     tokenize' :: [ParserLexer] -> [Token] -> String -> Either String [Token]
     tokenize' _ acc [] = Right acc
     tokenize' parsers acc input =
       case parseAllToken parsers input of
         Just (t, n) -> tokenize' parsers (acc ++ [t]) n
-        Nothing     -> Left $ "Current: " ++ show acc ++  ", Invalid tokens '" ++ input ++ "'"
+        Nothing     -> Left $ "Invalid tokens #" ++ input ++ "#"
 
 
 parseAllToken :: [ParserLexer] -> String -> Maybe (Token, String)
@@ -100,10 +99,9 @@ parseBasicToken ('}'  : next) = Just (ClCrlBr, next)
 parseBasicToken ('['  : next) = Just (OpCrch,  next)
 parseBasicToken (']'  : next) = Just (ClCrch,  next)
 parseBasicToken (';'  : next) = Just (SmCol,   next)
+parseBasicToken (':'  : next) = Just (Col,     next)
 parseBasicToken ('.'  : next) = Just (Dot,     next)
 parseBasicToken (','  : next) = Just (Com,     next)
-parseBasicToken ('"'  : next) = Just (Quot,    next)
-parseBasicToken ('\'' : next) = Just (Apo,     next)
 parseBasicToken ('\\' : next) = Just (BckSlsh, next)
 parseBasicToken ('>'  : '=' : next) = Just (GtEq, next)
 parseBasicToken ('<'  : '=' : next) = Just (LtEq, next)
@@ -144,6 +142,8 @@ parseLitToken = parseLitToken' []
       | isNumber acc      = Just (Lit (LitInt   (read acc)), [])
       | isNumberOrDot acc = Just (Lit (LitFloat (read acc)), [])
       | otherwise         = Nothing
+    parseLitToken' [] ('\'' : '\\' : c : '\'' : next) = Just (Lit (LitSChar c), next)
+    parseLitToken' [] ('\'' :        c : '\'' : next) = Just (Lit (LitChar  c), next)
     parseLitToken' [] ('"' : next) =
       case extractBtwQuot ('"' : next) of
         Just str -> Just (Lit (LitString str), drop (length str + 2) next)
@@ -167,4 +167,4 @@ parseIdeToken (c : next)
     parseIdeToken' acc ('_' : n) = parseIdeToken' (acc ++ ['_']) n
     parseIdeToken' acc ( cb : n)
       | isAlphaNum cb = parseIdeToken' (acc ++ [cb]) n
-      | otherwise     = Just (Ide acc, [])
+      | otherwise     = Just (Ide acc, cb : n)

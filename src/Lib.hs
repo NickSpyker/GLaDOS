@@ -1,4 +1,4 @@
-module Lib (readToString, getFilesContent, haveElemOf, rmOcc, isNumber, isNumberOrDot, extractBtwQuot) where
+module Lib (readToString, getFilesContent, haveElemOf, rmOcc, isNumber, isNumberOrDot, extractBtwQuot, trim) where
 
 
 import Control.Exception (catch, IOException)
@@ -58,3 +58,15 @@ extractBtwQuot ('"' : ms) = extractBtwQuot' [] ms
     extractBtwQuot' acc ( c   :     next) = extractBtwQuot' (acc ++ [c]) next
     extractBtwQuot' _ _ = Nothing
 extractBtwQuot _ = Nothing
+
+
+trim :: String -> String
+trim = trim' False
+ where
+  trim' :: Bool -> String -> String
+  trim' _ (' '  : next) = trim next
+  trim' _ ('\n' : next) = trim next
+  trim' _ ('\t' : next) = trim next
+  trim' _ ('\r' : next) = trim next
+  trim' False s = reverse $ trim' True $ reverse s
+  trim' True  s = s

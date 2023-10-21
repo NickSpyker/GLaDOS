@@ -1,9 +1,10 @@
 fun main() -> int
 {
-    let s: string = "Hello, World!";
+    let s: string = "Hello, World!\n";
     let f: float  = .2;
     let c: char   = 'c';
     let i: int    = 5;
+    let cs: char  = '\n';
 
     const x: int, y: int;
     
