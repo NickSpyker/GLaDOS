@@ -71,15 +71,18 @@ tokenize = tokenize' [
     tokenize' parsers acc input =
       case parseAllToken parsers input of
         Just (t, n) -> tokenize' parsers (acc ++ [t]) n
-        Nothing     -> Left $ "Invalid tokens '" ++ input ++ "'"
+        Nothing     -> Left $ "Current: " ++ show acc ++  ", Invalid tokens '" ++ input ++ "'"
 
 
 parseAllToken :: [ParserLexer] -> String -> Maybe (Token, String)
+parseAllToken _ [] = Nothing
 parseAllToken [] _ = Nothing
-parseAllToken (parser : next) input =
-  case parser input of
-    Just (t, n) -> Just (t, n)
-    Nothing     -> parseAllToken next input
+parseAllToken (parser : next) input
+  | head input `elem` [' ', '\t', '\r', '\n'] = parseAllToken (parser : next) $ tail input
+  | otherwise =
+      case parser input of
+        Just (t, n) -> Just (t, n)
+        Nothing     -> parseAllToken next input
 
 
 parseBasicToken :: String -> Maybe (Token, String)

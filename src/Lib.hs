@@ -30,14 +30,16 @@ rmOcc (value : next) occ
 
 
 isNumber :: String -> Bool
-isNumber [] = True
+isNumber []  = False
+isNumber [c] = isDigit c
 isNumber (c : cn)
   | isDigit c = isNumber cn
   | otherwise = False
 
 
 isNumberOrDot :: String -> Bool
-isNumberOrDot = isNumberOrDot' False
+isNumberOrDot []  = False
+isNumberOrDot inp = isNumberOrDot' False inp
   where
     isNumberOrDot' :: Bool -> String -> Bool
     isNumberOrDot' _ [] = True
