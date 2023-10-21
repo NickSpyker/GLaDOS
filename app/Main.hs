@@ -4,6 +4,7 @@ module Main (main, handleArgs, launchInterpreter, launchCompiler) where
 import Lib (getFilesContent, haveElemOf, rmOcc)
 import System.Environment (getArgs)
 import Usage (printHelp)
+import Lexer (tokenize)
 
 
 main :: IO ()
@@ -25,4 +26,4 @@ launchInterpreter files = putStrLn "Interpret with files:" >> print files
 
 
 launchCompiler :: [String] -> IO ()
-launchCompiler files = putStrLn "Compiler with files:" >> print files
+launchCompiler (file : _) = print $ tokenize file

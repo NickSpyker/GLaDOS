@@ -1,69 +1,40 @@
-### TOKEN DEFINITION
-<NAME> : alphanumeric expression /[a-zA-Z0-9_]+/
-
-<TYPE> :
-    chaine
-    entier
-    flottant
-    caractere
-    <TYPE>[]...
-
-<OP> :
-    sommer
-    multiplier
-    soustraire
-    diviser
-    +
-    -
-    *
-    /
-    %
-    et
-    ou
-    non
-    <
-    <=
-    >
-    >=
-    ==
-    non=
-
-<SEMANTIC> :
-    {}
-    ()
-    []
-    :
-    ,
-    ->
-
-# BLOCK DEFINITION
-definition <NAME>(<NAME>: <TYPE>, ...) -> <TYPE>
+fun main() -> int
 {
-    soit x: entier = 0 
+    let s: string = "Hello, World!";
+    let f: float  = .2;
+    let c: char   = 'c';
+    let i: int    = 5;
 
-    resultat TOKEN
-}
+    const x: int, y: int;
+    
+    x = 0;
+    y = 1;
 
-si TOKEN alors {
-    ...
-} sinon si TOKEN alors {
-    ...
-} sinon {
-    ...
-}
+    if x < y {
+        print_ln(s);
+    } else if x == y {
+        print_ln(x);
+    } else {
+        print_ln(y);
+    }
 
-tant que TOKEN {
-    ...
-}
+    for c in s {
+        print(c);
+    }
+    print_ln();
 
-pour TOKEN tant que TOKEN tels que TOKEN alors {
-    ...
-}
+    for i in 0..5 {
+        print_ln(i);
+        continue;
+    }
 
-faire {
-    ...
-} tant que TOKEN
+    loop {
+        break;
+    }
 
-boucler {
-    arreter
+    while x < i {
+        print_ln("Hello");
+    }
+
+    return 0;
 }
