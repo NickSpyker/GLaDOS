@@ -1,5 +1,4 @@
 stack.yaml.lock
-code_generator
 test/coverage
 glados.cabal
 .stack-work
