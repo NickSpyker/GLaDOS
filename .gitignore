@@ -2,7 +2,6 @@ stack.yaml.lock
 test/coverage
 glados.cabal
 .stack-work
-unit_tests
 .vscode
 glados
 .idea
