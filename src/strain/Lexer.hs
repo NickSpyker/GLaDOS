@@ -29,11 +29,17 @@ data Token
   | Or          -- "or"
   | Fun         -- "fun"
   | Var         -- "let"
+  | Const       -- "const"
   | Gt          -- '>'
   | GtEq        -- ">="
   | Lt          -- '<'
   | LtEq        -- "<="
   | Eq          -- "=="
+  | NotEq       -- "!="
+  | AddAsgn     -- "+="
+  | MulAsgn     -- "*="
+  | SubAsgn     -- "-="
+  | DivAsgn     -- "/="
   | RetTy       -- "->"
   | For         -- "for"
   | If          -- "if"
@@ -85,11 +91,7 @@ parseAllToken (parser : next) input
 
 
 parseBasicToken :: String -> Maybe (Token, String)
-parseBasicToken ('+'  : next) = Just (Add, next)
-parseBasicToken ('*'  : next) = Just (Mul, next)
-parseBasicToken ('/'  : next) = Just (Div, next)
 parseBasicToken ('%'  : next) = Just (Mod, next)
-parseBasicToken ('!'  : next) = Just (Not, next)
 parseBasicToken ('('  : next) = Just (OpPrth,  next)
 parseBasicToken (')'  : next) = Just (ClPrth,  next)
 parseBasicToken ('{'  : next) = Just (OpCrlBr, next)
@@ -101,14 +103,23 @@ parseBasicToken (':'  : next) = Just (Col,     next)
 parseBasicToken ('.'  : next) = Just (Dot,     next)
 parseBasicToken (','  : next) = Just (Com,     next)
 parseBasicToken ('\\' : next) = Just (BckSlsh, next)
-parseBasicToken ('-'  : '>' : next) = Just (RetTy, next)
-parseBasicToken ('>'  : '=' : next) = Just (GtEq,  next)
-parseBasicToken ('<'  : '=' : next) = Just (LtEq,  next)
-parseBasicToken ('='  : '=' : next) = Just (Eq,    next)
+parseBasicToken ('-'  : '>' : next) = Just (RetTy,   next)
+parseBasicToken ('>'  : '=' : next) = Just (GtEq,    next)
+parseBasicToken ('<'  : '=' : next) = Just (LtEq,    next)
+parseBasicToken ('!'  : '=' : next) = Just (NotEq,   next)
+parseBasicToken ('='  : '=' : next) = Just (Eq,      next)
+parseBasicToken ('+'  : '=' : next) = Just (AddAsgn, next)
+parseBasicToken ('*'  : '=' : next) = Just (MulAsgn, next)
+parseBasicToken ('-'  : '=' : next) = Just (MulAsgn, next)
+parseBasicToken ('/'  : '=' : next) = Just (DivAsgn, next)
+parseBasicToken ('+'  : next) = Just (Add,  next)
+parseBasicToken ('*'  : next) = Just (Mul,  next)
+parseBasicToken ('-'  : next) = Just (Sub,  next)
+parseBasicToken ('/'  : next) = Just (Div,  next)
+parseBasicToken ('!'  : next) = Just (Not,  next)
 parseBasicToken ('>'  : next) = Just (Gt,   next)
 parseBasicToken ('<'  : next) = Just (Lt,   next)
 parseBasicToken ('='  : next) = Just (Asgn, next)
-parseBasicToken ('-'  : next) = Just (Sub,  next)
 parseBasicToken _ = Nothing
 
 
@@ -121,12 +132,15 @@ parseWordToken ('a' : 'n' : 'd' :       next) = Just (And,  next)
 parseWordToken ('f' : 'u' : 'n' :       next) = Just (Fun,  next)
 parseWordToken ('l' : 'e' : 't' :       next) = Just (Var,  next)
 parseWordToken ('e' : 'l' : 's' : 'e' : next) = Just (Else, next)
+parseWordToken ('t' : 'r' : 'u' : 'e' : next) = Just (Lit (LitBool True),   next)
 parseWordToken ('l' : 'o' : 'o' : 'p' :             next) = Just (Loop,     next)
 parseWordToken ('w' : 'h' : 'i' : 'l' : 'e' :       next) = Just (While,    next)
 parseWordToken ('b' : 'r' : 'e' : 'a' : 'k' :       next) = Just (Break,    next)
+parseWordToken ('f' : 'a' : 'l' : 's' : 'e' :       next) = Just (Lit (LitBool True), next)
 parseWordToken ('r' : 'e' : 't' : 'u' : 'r' : 'n' : next) = Just (Return,   next)
 parseWordToken ('s' : 't' : 'r' : 'i' : 'n' : 'g' : next) = Just (TyString, next)
 parseWordToken ('f' : 'l' : 'o' : 'a' : 't' :       next) = Just (TyFloat,  next)
+parseWordToken ('c' : 'o' : 'n' : 's' : 't' :       next) = Just (Const,    next)
 parseWordToken ('c' : 'h' : 'a' : 'r' :             next) = Just (TyChar,   next)
 parseWordToken ('i' : 'n' : 't' :                   next) = Just (TyInt,    next)
 parseWordToken ('i' : 'n' : next) = Just (In, next)

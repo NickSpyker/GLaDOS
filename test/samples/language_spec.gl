@@ -1,10 +1,22 @@
+fun isEven(nbr: int) -> bool
+{
+    if nbr == 0 {
+        return true;
+    }
+
+    nbr -= 1;
+
+    return not isEven(nbr);
+}
+
 fun main() -> int
 {
-    let s: string = "Hello, World!\n";
-    let f: float  = .2;
-    let c: char   = 'c';
-    let i: int    = 5;
-    let cs: char  = '\n';
+    let str: string = "Hello, World!\n";
+    let f_val: float = .2;
+    let f_nbr: float = 5.;
+    let c: char = 'c';
+    let nbr: int = 5;
+    let special_c: char = '\n';
 
     const x: int, y: int;
     
@@ -36,6 +48,15 @@ fun main() -> int
     while x < i {
         print_ln("Hello");
     }
+
+    if isEven(nbr) {
+        print_ln("no");
+    }
+    if isEven(nbr - 1) {
+        print_ln("yes");
+    }
+
+    const c: string = "yes";
 
     return 0;
 }
