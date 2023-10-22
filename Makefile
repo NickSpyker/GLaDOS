@@ -29,11 +29,16 @@ coverage: fclean tests_run
 	@stack hpc report --all --destdir $(COVERAGE_PATH)
 	@firefox ./test/coverage/hpc_index.html
 
+bonus: all
+	@make -C ./bonus
+
 clean:
 	@stack clean
+	@make clean -C ./bonus
 
 fclean: clean
 	@$(RM) -r $(COVERAGE_PATH) ./.stack-work ./out
 	@$(RM) $(NAME) $(TEST_NAME) ./stack.yaml.lock ./glados.cabal
+	@make fclean -C ./bonus
 
 re: fclean all

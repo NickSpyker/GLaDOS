@@ -1,2 +1,4 @@
 code_generator
-target/
+.vscode
+target
+.idea

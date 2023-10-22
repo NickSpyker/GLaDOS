@@ -1,7 +1,10 @@
 stack.yaml.lock
+code_generator
 test/coverage
 glados.cabal
 .stack-work
 unit_tests
+.vscode
 glados
+.idea
 *~
