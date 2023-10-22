@@ -8,7 +8,8 @@ pub struct Syntax {
     pub type_field: Type,
     pub logic:      Logic,
     pub control:    Control,
-    pub biding:     Biding
+    pub biding:     Biding,
+    pub value:      Value
 }
 
 impl Syntax {
@@ -73,4 +74,13 @@ pub struct Biding {
     pub variable: String,
     pub constant: String,
     pub function: String
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Value {
+    #[serde(rename = "true")]
+    pub true_field:  String,
+    #[serde(rename = "false")]
+    pub false_field: String
 }

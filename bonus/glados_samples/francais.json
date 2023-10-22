@@ -26,5 +26,9 @@
         "variable": "soit",
         "constant": "const",
         "function": "fonction"
+    },
+    "value": {
+        "true": "vrai",
+        "false": "faux"
     }
 }

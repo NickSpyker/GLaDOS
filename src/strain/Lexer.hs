@@ -182,3 +182,16 @@ parseIdeToken (c : next)
     parseIdeToken' acc ( cb : n)
       | isAlphaNum cb = parseIdeToken' (acc ++ [cb]) n
       | otherwise     = Just (Ide acc, cb : n)
+
+
+
+
+
+
+
+
+
+
+
+
+

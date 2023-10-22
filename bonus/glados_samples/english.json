@@ -26,5 +26,9 @@
         "variable": "let",
         "constant": "const",
         "function": "fun"
+    },
+    "value": {
+        "true": "true",
+        "false": "false"
     }
 }
