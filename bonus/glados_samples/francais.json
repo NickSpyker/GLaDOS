@@ -1,3 +1,30 @@
 {
-    
+    "type": {
+        "string": "chaine",
+        "float":  "flottant",
+        "bool":   "booleen",
+        "char":   "caractere",
+        "int":    "entier"
+    },
+    "logic": {
+        "and": "et",
+        "or":  "ou",
+        "not": "non"
+    },
+    "control": {
+        "if":       "si",
+        "else":     "sinon",
+        "for":      "pour",
+        "in":       "dans",
+        "loop":     "boucle",
+        "while":    "tant que",
+        "break":    "sortir",
+        "continue": "continuer",
+        "return":   "retour"
+    },
+    "biding": {
+        "variable": "soit",
+        "constant": "const",
+        "function": "fonction"
+    }
 }

@@ -1,3 +1,30 @@
 {
-    
+    "type": {
+        "string": "string",
+        "float":  "float",
+        "bool":   "bool",
+        "char":   "char",
+        "int":    "int"
+    },
+    "logic": {
+        "and": "and",
+        "or":  "or",
+        "not": "not"
+    },
+    "control": {
+        "if":       "if",
+        "else":     "else",
+        "for":      "for",
+        "in":       "in",
+        "loop":     "loop",
+        "while":    "while",
+        "break":    "break",
+        "continue": "continue",
+        "return":   "return"
+    },
+    "biding": {
+        "variable": "let",
+        "constant": "const",
+        "function": "fun"
+    }
 }

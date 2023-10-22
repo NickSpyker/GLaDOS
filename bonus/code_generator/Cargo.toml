@@ -5,4 +5,15 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "vendor"
+
 [dependencies]
+serde = { version = "1.0.189", features = ["derive"] }
+dotenv_codegen = "0.15.0"
+serde_json = "1.0.107"
+walkdir = "2.4.0"
+regex = "1.10.2"
