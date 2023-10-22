@@ -124,26 +124,26 @@ parseBasicToken _ = Nothing
 
 
 parseWordToken :: String -> Maybe (Token, String)
-parseWordToken ('i' : 'f' :             next) = Just (If,   next)
-parseWordToken ('o' : 'r' :             next) = Just (Or,   next)
-parseWordToken ('f' : 'o' : 'r' :       next) = Just (For,  next)
-parseWordToken ('n' : 'o' : 't' :       next) = Just (Not,  next)
-parseWordToken ('a' : 'n' : 'd' :       next) = Just (And,  next)
-parseWordToken ('f' : 'u' : 'n' :       next) = Just (Fun,  next)
-parseWordToken ('l' : 'e' : 't' :       next) = Just (Var,  next)
-parseWordToken ('e' : 'l' : 's' : 'e' : next) = Just (Else, next)
-parseWordToken ('t' : 'r' : 'u' : 'e' : next) = Just (Lit (LitBool True),   next)
-parseWordToken ('l' : 'o' : 'o' : 'p' :             next) = Just (Loop,     next)
-parseWordToken ('w' : 'h' : 'i' : 'l' : 'e' :       next) = Just (While,    next)
-parseWordToken ('b' : 'r' : 'e' : 'a' : 'k' :       next) = Just (Break,    next)
-parseWordToken ('f' : 'a' : 'l' : 's' : 'e' :       next) = Just (Lit (LitBool True), next)
-parseWordToken ('r' : 'e' : 't' : 'u' : 'r' : 'n' : next) = Just (Return,   next)
-parseWordToken ('s' : 't' : 'r' : 'i' : 'n' : 'g' : next) = Just (TyString, next)
-parseWordToken ('f' : 'l' : 'o' : 'a' : 't' :       next) = Just (TyFloat,  next)
-parseWordToken ('c' : 'o' : 'n' : 's' : 't' :       next) = Just (Const,    next)
-parseWordToken ('c' : 'h' : 'a' : 'r' :             next) = Just (TyChar,   next)
-parseWordToken ('i' : 'n' : 't' :                   next) = Just (TyInt,    next)
-parseWordToken ('i' : 'n' : next) = Just (In, next)
+parseWordToken ('i' : 'f' :             next) = Just (If,   next) -- <if>
+parseWordToken ('o' : 'r' :             next) = Just (Or,   next) -- <or>
+parseWordToken ('f' : 'o' : 'r' :       next) = Just (For,  next) -- <for>
+parseWordToken ('n' : 'o' : 't' :       next) = Just (Not,  next) -- <not>
+parseWordToken ('a' : 'n' : 'd' :       next) = Just (And,  next) -- <and>
+parseWordToken ('f' : 'u' : 'n' :       next) = Just (Fun,  next) -- <fun>
+parseWordToken ('l' : 'e' : 't' :       next) = Just (Var,  next) -- <let>
+parseWordToken ('e' : 'l' : 's' : 'e' : next) = Just (Else, next) -- <else>
+parseWordToken ('t' : 'r' : 'u' : 'e' : next) = Just (Lit (LitBool True),   next) -- <true>
+parseWordToken ('l' : 'o' : 'o' : 'p' :             next) = Just (Loop,     next) -- <loop>
+parseWordToken ('w' : 'h' : 'i' : 'l' : 'e' :       next) = Just (While,    next) -- <while>
+parseWordToken ('b' : 'r' : 'e' : 'a' : 'k' :       next) = Just (Break,    next) -- <break>
+parseWordToken ('f' : 'a' : 'l' : 's' : 'e' :       next) = Just (Lit (LitBool True), next) -- <false>
+parseWordToken ('r' : 'e' : 't' : 'u' : 'r' : 'n' : next) = Just (Return,   next) -- <return>
+parseWordToken ('s' : 't' : 'r' : 'i' : 'n' : 'g' : next) = Just (TyString, next) -- <string>
+parseWordToken ('f' : 'l' : 'o' : 'a' : 't' :       next) = Just (TyFloat,  next) -- <float>
+parseWordToken ('c' : 'o' : 'n' : 's' : 't' :       next) = Just (Const,    next) -- <const>
+parseWordToken ('c' : 'h' : 'a' : 'r' :             next) = Just (TyChar,   next) -- <char>
+parseWordToken ('i' : 'n' : 't' :                   next) = Just (TyInt,    next) -- <int>
+parseWordToken ('i' : 'n' : next) = Just (In, next) -- <in>
 parseWordToken _ = Nothing
 
 
@@ -182,16 +182,3 @@ parseIdeToken (c : next)
     parseIdeToken' acc ( cb : n)
       | isAlphaNum cb = parseIdeToken' (acc ++ [cb]) n
       | otherwise     = Just (Ide acc, cb : n)
-
-
-
-
-
-
-
-
-
-
-
-
-
