@@ -30,13 +30,14 @@ fn main() -> Result<(), String>
 
     code.fetch_language_section_lines()?;
     code.build_code(&syntax)?;
-    code.build_function();
 
     let new_buffer: String = code.build_buffer()?;
 
     if let Err(err) = fs::write(&file, &new_buffer) {
         return Err(format!("Failed to write new code to file: {}", err));
     }
+
+    println!("Refactor function to:\n\nparseWordToken :: String -> Maybe (Token, String)\n{}parseWordToken _ = Nothing", code.build_function());
 
     Ok(())
 }

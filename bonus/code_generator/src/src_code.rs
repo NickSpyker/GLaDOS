@@ -61,12 +61,14 @@ impl SrcCode {
         Ok(())
     }
 
-    pub fn build_function(&mut self)
+    pub fn build_function(&mut self) -> String
     {
         let mut fun_lines: Vec<String> = Vec::new();
         for line in self.codes.values() {
             fun_lines.push(line.to_string());
         }
+        fun_lines.sort_by(|a, b| b.len().cmp(&a.len()));
+        fun_lines.join("").to_string()
     }
 
     pub fn build_buffer(&self) -> Result<String, String>
