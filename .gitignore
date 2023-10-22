@@ -2,6 +2,7 @@ stack.yaml.lock
 test/coverage
 glados.cabal
 .stack-work
+code_gen
 .vscode
 glados
 .idea
