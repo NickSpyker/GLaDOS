@@ -99,7 +99,8 @@ impl SrcCode {
             if i < last_line { continue }
             last_part.push_str(&format!("{}\n", bv[i]));
         }
+        last_part = last_part.trim().to_string();
 
-        Ok(format!("{first_part}{middle_part}{last_part}"))
+        Ok(format!("{first_part}{middle_part}{last_part}\n"))
     }
 }
