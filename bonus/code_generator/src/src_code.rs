@@ -76,6 +76,8 @@ impl SrcCode {
             value.push(line_buffer.clone());
         }
 
+        value.sort_by(|a, b| b.len().cmp(&a.len()));
+
         let first_line: usize = match self.codes.first_key_value() {
             Some((key, _)) => *key,
             None => return Err("unhandled error".to_string())
