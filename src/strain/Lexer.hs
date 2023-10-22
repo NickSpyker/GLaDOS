@@ -70,7 +70,7 @@ tokenize buffer = tokenize' [
     tokenize' parsers acc input =
       case parseAllToken parsers input of
         Just (t, n) -> tokenize' parsers (acc ++ [t]) n
-        Nothing     -> Left $ "Invalid tokens #" ++ input ++ "#"
+        Nothing     -> Left $ "Invalid token #" ++ input ++ "#"
 
 
 parseAllToken :: [ParserLexer] -> String -> Maybe (Token, String)
@@ -86,8 +86,6 @@ parseAllToken (parser : next) input
 
 parseBasicToken :: String -> Maybe (Token, String)
 parseBasicToken ('+'  : next) = Just (Add, next)
-parseBasicToken ('-'  : '>' : next) = Just (RetTy, next)
-parseBasicToken ('-'  : next) = Just (Sub, next)
 parseBasicToken ('*'  : next) = Just (Mul, next)
 parseBasicToken ('/'  : next) = Just (Div, next)
 parseBasicToken ('%'  : next) = Just (Mod, next)
@@ -103,12 +101,14 @@ parseBasicToken (':'  : next) = Just (Col,     next)
 parseBasicToken ('.'  : next) = Just (Dot,     next)
 parseBasicToken (','  : next) = Just (Com,     next)
 parseBasicToken ('\\' : next) = Just (BckSlsh, next)
-parseBasicToken ('>'  : '=' : next) = Just (GtEq, next)
-parseBasicToken ('<'  : '=' : next) = Just (LtEq, next)
-parseBasicToken ('>'  :       next) = Just (Gt,   next)
-parseBasicToken ('<'  :       next) = Just (Lt,   next)
-parseBasicToken ('='  : '=' : next) = Just (Eq,   next)
-parseBasicToken ('='  :       next) = Just (Asgn, next)
+parseBasicToken ('-'  : '>' : next) = Just (RetTy, next)
+parseBasicToken ('>'  : '=' : next) = Just (GtEq,  next)
+parseBasicToken ('<'  : '=' : next) = Just (LtEq,  next)
+parseBasicToken ('='  : '=' : next) = Just (Eq,    next)
+parseBasicToken ('>'  : next) = Just (Gt,   next)
+parseBasicToken ('<'  : next) = Just (Lt,   next)
+parseBasicToken ('='  : next) = Just (Asgn, next)
+parseBasicToken ('-'  : next) = Just (Sub,  next)
 parseBasicToken _ = Nothing
 
 
@@ -159,10 +159,10 @@ parseIdeToken :: String -> Maybe (Token, String)
 parseIdeToken [] = Nothing
 parseIdeToken (c : next)
   | isAlphaNum c = parseIdeToken' [] (c : next)
-  | otherwise = Nothing
+  | otherwise    = Nothing
   where
     parseIdeToken' :: String -> String -> Maybe (Token, String)
-    parseIdeToken' [] [] = Nothing
+    parseIdeToken' []  [] = Nothing
     parseIdeToken' acc [] = Just (Ide acc, [])
     parseIdeToken' acc ('_' : n) = parseIdeToken' (acc ++ ['_']) n
     parseIdeToken' acc ( cb : n)
