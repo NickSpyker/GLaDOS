@@ -11,7 +11,7 @@ TEST_PATH := $(shell stack path --dist-dir)
 COVERAGE_PATH = ./test/coverage
 TEST_NAME = ./unit_tests
 
-.PHONY: all tests_run clean fclean re
+.PHONY: all tests_run coverage bonus clean fclean re
 
 all:
 	@stack build --copy-bins --local-bin-path ./
@@ -29,7 +29,7 @@ coverage: fclean tests_run
 	@stack hpc report --all --destdir $(COVERAGE_PATH)
 	@firefox ./test/coverage/hpc_index.html
 
-bonus: all
+bonus:
 	@make -C ./bonus
 
 clean:
