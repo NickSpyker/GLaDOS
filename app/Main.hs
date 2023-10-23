@@ -13,32 +13,34 @@ main = getArgs >>= handleArgs
 
 
 handleArgs :: [String] -> IO ()
-handleArgs [] = launchInterpreter []
+handleArgs [] = launchInterpreter [] []
 handleArgs input
   | input `haveElemOf` ["-h", "--help"] = printHelp
   | input `haveElemOf` ["-i", "--interpret"] =
-      getFilesContent (input `rmOcc` ["-i", "--interpret"]) >>= either putStrLn launchInterpreter
+      getFilesContent (input `rmOcc` ["-i", "--interpret"])
+        >>= either putStrLn (launchInterpreter (input `rmOcc` ["-i", "--interpret"]))
   | otherwise =
-      getFilesContent input >>= either putStrLn launchCompiler
+      getFilesContent input >>= either putStrLn (launchCompiler input)
 
 
-buildAstTree :: [String] -> Either String BExpr
+buildAstTree :: [String] -> [String] -> Either String BExpr
 buildAstTree = buildAstTree' []
   where
-    buildAstTree' :: [BExpr] -> [String] -> Either String BExpr
-    buildAstTree' acc [] = Right $ Program acc
-    buildAstTree' acc (file : files) =
+    buildAstTree' :: [BExpr] -> [String] -> [String] -> Either String BExpr
+    buildAstTree' acc _ [] = Right $ Program acc
+    buildAstTree' acc (path : paths) (file : files) =
       case tokenize file of
         Left err     -> Left err
         Right tokens ->
-          case tokensToBlock file tokens of
+          case tokensToBlock path tokens of
             Left err -> Left err
-            Right mo -> buildAstTree' (acc ++ [mo]) files
+            Right mo -> buildAstTree' (acc ++ [mo]) paths files
+    buildAstTree' _ _ _ = Left "unhandled error"
 
 
-launchInterpreter :: [String] -> IO ()
-launchInterpreter files = print $ buildAstTree files
+launchInterpreter :: [String] -> [String] -> IO ()
+launchInterpreter paths files = print $ buildAstTree paths files
 
 
-launchCompiler :: [String] -> IO ()
-launchCompiler files = print $ buildAstTree files
+launchCompiler :: [String] -> [String] -> IO ()
+launchCompiler paths files = print $ buildAstTree paths files
