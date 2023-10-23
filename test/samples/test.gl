@@ -1,3 +1,9 @@
+use tools::isEven as is_even;
+
+fun main() -> int
 {
-    
+    let x: int = 5;
+    let x: int = 5;
+
+    return 0;
 }

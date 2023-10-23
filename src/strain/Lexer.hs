@@ -88,6 +88,12 @@ tokenize buffer = tokenize' [
 parseAllToken :: [ParserLexer] -> String -> Maybe (Token, String)
 parseAllToken _ [] = Nothing
 parseAllToken [] _ = Nothing
+parseAllToken parsers ('/' : '/' : input) = parseAllToken parsers $ ignoreComment input
+  where
+    ignoreComment :: String -> String
+    ignoreComment ('\n' : next) = next
+    ignoreComment (_    : next) = ignoreComment next
+    ignoreComment _ = ""
 parseAllToken (parser : next) input
   | head input `elem` [' ', '\t', '\r', '\n'] = parseAllToken (parser : next) $ tail input
   | otherwise =
