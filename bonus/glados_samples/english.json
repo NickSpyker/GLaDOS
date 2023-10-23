@@ -23,9 +23,12 @@
         "return":   "return"
     },
     "biding": {
-        "variable": "let",
-        "constant": "const",
-        "function": "fun"
+        "variable":   "let",
+        "constant":   "const",
+        "function":   "fun",
+        "structure":  "struct",
+        "enumerator": "enum",
+        "new_type":   "type"
     },
     "value": {
         "true": "true",

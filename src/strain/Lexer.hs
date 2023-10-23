@@ -54,6 +54,9 @@ data Token
   | TyFloat     -- "float"
   | TyChar      -- "char"
   | TyInt       -- "int"
+  | DeclType    -- "type"
+  | Struct      -- "struct"
+  | Enum        -- "enum"
   | Lit Literal -- 0-9 "*" 0-9. '*'
   | Ide String  -- Identifiant name
   deriving (Show, Eq)
@@ -126,13 +129,16 @@ parseBasicToken _ = Nothing
 parseWordToken :: String -> Maybe (Token, String)
 parseWordToken ('f' : 'a' : 'l' : 's' : 'e' : next) = Just (Lit (LitBool False), next) -- <false>
 parseWordToken ('s' : 't' : 'r' : 'i' : 'n' : 'g' : next) = Just (TyString, next) -- <string>
+parseWordToken ('s' : 't' : 'r' : 'u' : 'c' : 't' : next) = Just (Struct, next) -- <struct>
 parseWordToken ('r' : 'e' : 't' : 'u' : 'r' : 'n' : next) = Just (Return, next) -- <return>
 parseWordToken ('t' : 'r' : 'u' : 'e' : next) = Just (Lit (LitBool True), next) -- <true>
 parseWordToken ('f' : 'l' : 'o' : 'a' : 't' : next) = Just (TyFloat, next) -- <float>
 parseWordToken ('w' : 'h' : 'i' : 'l' : 'e' : next) = Just (While, next) -- <while>
 parseWordToken ('b' : 'r' : 'e' : 'a' : 'k' : next) = Just (Break, next) -- <break>
 parseWordToken ('c' : 'o' : 'n' : 's' : 't' : next) = Just (Const, next) -- <const>
+parseWordToken ('t' : 'y' : 'p' : 'e' : next) = Just (DeclType, next) -- <type>
 parseWordToken ('c' : 'h' : 'a' : 'r' : next) = Just (TyChar, next) -- <char>
+parseWordToken ('e' : 'n' : 'u' : 'm' : next) = Just (Enum, next) -- <enum>
 parseWordToken ('l' : 'o' : 'o' : 'p' : next) = Just (Loop, next) -- <loop>
 parseWordToken ('e' : 'l' : 's' : 'e' : next) = Just (Else, next) -- <else>
 parseWordToken ('i' : 'n' : 't' : next) = Just (TyInt, next) -- <int>

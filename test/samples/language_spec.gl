@@ -1,3 +1,15 @@
+type string_array = string[];
+
+enum Dico {
+    first,
+    second
+}
+
+struct point {
+    x: float,
+    y: float
+}
+
 fun isEven(nbr: int) -> bool
 {
     if nbr == 0 {

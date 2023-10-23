@@ -71,9 +71,13 @@ pub struct Control {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Biding {
-    pub variable: String,
-    pub constant: String,
-    pub function: String
+    pub variable:   String,
+    pub constant:   String,
+    pub function:   String,
+    pub structure:  String,
+    pub enumerator: String,
+    #[serde(rename = "new_type")]
+    pub new_type:   String
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]

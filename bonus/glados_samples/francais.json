@@ -25,7 +25,10 @@
     "biding": {
         "variable": "soit",
         "constant": "const",
-        "function": "fonction"
+        "function": "fonction",
+        "structure": "structure",
+        "enumerator": "enumeration",
+        "new_type": "categorie"
     },
     "value": {
         "true": "vrai",
