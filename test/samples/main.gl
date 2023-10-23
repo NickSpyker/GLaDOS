@@ -1,4 +1,4 @@
-use tools::other_function as of;
+use tools::isEven as is_even;
 
 type str_array = string[];
 
@@ -10,17 +10,6 @@ enum Dico {
 struct point {
     x: float,
     y: float
-}
-
-fun isEven(nbr: int) -> bool
-{
-    if nbr == 0 {
-        return true;
-    }
-
-    nbr -= 1;
-
-    return not isEven(nbr);
 }
 
 fun main() -> int
@@ -63,10 +52,10 @@ fun main() -> int
         print_ln("Hello");
     }
 
-    if isEven(nbr) {
+    if is_even(nbr) {
         print_ln("no");
     }
-    if isEven(nbr - 1) {
+    if is_even(nbr - 1) {
         print_ln("yes");
     }
 

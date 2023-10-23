@@ -1,0 +1,8 @@
+fun isEven(nbr: int) -> bool
+{
+    if nbr == 0 {
+        return true;
+    }
+
+    return not isEven(nbr - 1);
+}
