@@ -33,7 +33,7 @@ buildAstTree = buildAstTree' []
         Right tokens ->
           case tokensToBlock file tokens of
             Left err -> Left err
-            Right bl -> buildAstTree' (acc ++ [bl]) files
+            Right mo -> buildAstTree' (acc ++ [mo]) files
 
 
 launchInterpreter :: [String] -> IO ()

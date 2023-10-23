@@ -5,23 +5,24 @@ import Lexer (Token(..))
 
 
 data BExpr
-  = Program  [BExpr]
-  | InPrths  [BExpr]
-  | InHooks  [BExpr]
-  | InBraces [BExpr]
-  | BefSmCol [BExpr]
-  | Expr      Token
-  | Block     String [BExpr]
+  = Program  [BExpr]          -- all files, a list of modules
+  | Module    String [BExpr]  -- one file, filename and code
+  | InBraces [BExpr]          -- { this }
+  | InPrths  [BExpr]          -- ( this )
+  | InHooks  [BExpr]          -- [ this ]
+  | BefSmCol [BExpr]          -- BIDING_OR_CALL_TOKEN this ;
+  | Expr      Token           -- anything
   deriving (Show, Eq)
+
+
+type ParserBlockExpr = [Token] -> Maybe (BExpr, [Token])
 
 
 tokensToBlock :: String -> [Token] -> Either String BExpr
 tokensToBlock moduleName tokens =
   case tokensToBlock' tokens of
-    Left  err          -> Left err
-    Right (Block _ bl) -> Right $ Block moduleName bl
-    Right (Expr expr)  -> Right $ Block moduleName [Expr expr]
-    Right block        -> Right $ Block moduleName [block]
+    Left  err  -> Left err
+    Right list -> Right $ Module moduleName list
   where
-    tokensToBlock' :: [Token] -> Either String BExpr
-    tokensToBlock' _ = Left "no"
+    tokensToBlock' :: [Token] -> Either String [BExpr]
+    tokensToBlock' tokens = Left "no"
