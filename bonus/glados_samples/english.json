@@ -33,7 +33,7 @@
         "new_type":   "type"
     },
     "value": {
-        "true": "true",
+        "true":  "true",
         "false": "false"
     }
 }

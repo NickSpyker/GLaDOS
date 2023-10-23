@@ -14,7 +14,6 @@ struct point {
 
 fun main() -> int
 {
-    let str: string = "Hello, World!\n";
     let f_val: float = .2;
     let f_nbr: float = 5.;
     let c: char = 'c';

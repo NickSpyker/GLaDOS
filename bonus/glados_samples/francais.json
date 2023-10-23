@@ -25,15 +25,15 @@
         "rename":   "comme"
     },
     "biding": {
-        "variable": "soit",
-        "constant": "const",
-        "function": "fonction",
-        "structure": "structure",
+        "variable":   "soit",
+        "constant":   "const",
+        "function":   "fonction",
+        "structure":  "structure",
         "enumerator": "enumeration",
-        "new_type": "categorie"
+        "new_type":   "categorie"
     },
     "value": {
-        "true": "vrai",
+        "true":  "vrai",
         "false": "faux"
     }
 }
