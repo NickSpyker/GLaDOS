@@ -1,4 +1,4 @@
-type string_array = string[];
+type str_array = string[];
 
 enum Dico {
     first,

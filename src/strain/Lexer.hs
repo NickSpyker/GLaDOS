@@ -79,7 +79,7 @@ tokenize buffer = tokenize' [
     tokenize' parsers acc input =
       case parseAllToken parsers input of
         Just (t, n) -> tokenize' parsers (acc ++ [t]) n
-        Nothing     -> Left $ "Invalid token #" ++ input ++ "#"
+        Nothing     -> Left $ "<Invalid token> #" ++ input ++ "#"
 
 
 parseAllToken :: [ParserLexer] -> String -> Maybe (Token, String)
