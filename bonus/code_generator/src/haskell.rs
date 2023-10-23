@@ -41,6 +41,8 @@ fn translate(value: &str, dico: &Syntax) -> Result<String, String>
         "type"   => Ok(dico.biding     .new_type     .to_string()),
         "struct" => Ok(dico.biding     .structure    .to_string()),
         "enum"   => Ok(dico.biding     .enumerator   .to_string()),
+        "use"    => Ok(dico.control    .import       .to_string()),
+        "as"     => Ok(dico.control    .rename       .to_string()),
         _        => Err(format!("Invalid token {}", value))
     }
 }
@@ -71,6 +73,8 @@ fn value_to_code(value: &str) -> Result<String, String>
         "type"   => Ok("DeclType".to_string()),
         "struct" => Ok("Struct".to_string()),
         "enum"   => Ok("Enum".to_string()),
+        "use"    => Ok("Import".to_string()),
+        "as"     => Ok("RName".to_string()),
         _        => Err(format!("Invalid token {}", value))
     }
 }

@@ -1,3 +1,5 @@
+use tools::other_function as of;
+
 type str_array = string[];
 
 enum Dico {

@@ -65,7 +65,9 @@ pub struct Control {
     #[serde(rename = "continue")]
     pub continue_field: String,
     #[serde(rename = "return")]
-    pub return_field:   String
+    pub return_field:   String,
+    pub import:         String,
+    pub rename:         String
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]

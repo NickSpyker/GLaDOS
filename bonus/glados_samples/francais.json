@@ -20,7 +20,9 @@
         "while":    "tant que",
         "break":    "sortir",
         "continue": "continuer",
-        "return":   "retour"
+        "return":   "retour",
+        "import":   "utiliser",
+        "rename":   "comme"
     },
     "biding": {
         "variable": "soit",

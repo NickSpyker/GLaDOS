@@ -15,6 +15,7 @@ data Token
   | ClCrch      -- ']
   | SmCol       -- ';'
   | Col         -- ':'
+  | DCol        -- "::"
   | Dot         -- '.'
   | Com         -- ','
   | BckSlsh     -- '\'
@@ -57,6 +58,8 @@ data Token
   | DeclType    -- "type"
   | Struct      -- "struct"
   | Enum        -- "enum"
+  | Import      -- "use"
+  | RName       -- "as"
   | Lit Literal -- 0-9 "*" 0-9. '*'
   | Ide String  -- Identifiant name
   deriving (Show, Eq)
@@ -102,10 +105,10 @@ parseBasicToken ('}'  : next) = Just (ClCrlBr, next)
 parseBasicToken ('['  : next) = Just (OpCrch,  next)
 parseBasicToken (']'  : next) = Just (ClCrch,  next)
 parseBasicToken (';'  : next) = Just (SmCol,   next)
-parseBasicToken (':'  : next) = Just (Col,     next)
 parseBasicToken ('.'  : next) = Just (Dot,     next)
 parseBasicToken (','  : next) = Just (Com,     next)
 parseBasicToken ('\\' : next) = Just (BckSlsh, next)
+parseBasicToken (':'  : ':' : next) = Just (DCol,    next)
 parseBasicToken ('-'  : '>' : next) = Just (RetTy,   next)
 parseBasicToken ('>'  : '=' : next) = Just (GtEq,    next)
 parseBasicToken ('<'  : '=' : next) = Just (LtEq,    next)
@@ -120,6 +123,7 @@ parseBasicToken ('*'  : next) = Just (Mul,  next)
 parseBasicToken ('-'  : next) = Just (Sub,  next)
 parseBasicToken ('/'  : next) = Just (Div,  next)
 parseBasicToken ('!'  : next) = Just (Not,  next)
+parseBasicToken (':'  : next) = Just (Col,  next)
 parseBasicToken ('>'  : next) = Just (Gt,   next)
 parseBasicToken ('<'  : next) = Just (Lt,   next)
 parseBasicToken ('='  : next) = Just (Asgn, next)
@@ -141,12 +145,14 @@ parseWordToken ('c' : 'h' : 'a' : 'r' : next) = Just (TyChar, next) -- <char>
 parseWordToken ('e' : 'n' : 'u' : 'm' : next) = Just (Enum, next) -- <enum>
 parseWordToken ('l' : 'o' : 'o' : 'p' : next) = Just (Loop, next) -- <loop>
 parseWordToken ('e' : 'l' : 's' : 'e' : next) = Just (Else, next) -- <else>
+parseWordToken ('u' : 's' : 'e' : next) = Just (Import, next) -- <use>
 parseWordToken ('i' : 'n' : 't' : next) = Just (TyInt, next) -- <int>
 parseWordToken ('f' : 'u' : 'n' : next) = Just (Fun, next) -- <fun>
 parseWordToken ('f' : 'o' : 'r' : next) = Just (For, next) -- <for>
 parseWordToken ('l' : 'e' : 't' : next) = Just (Var, next) -- <let>
 parseWordToken ('n' : 'o' : 't' : next) = Just (Not, next) -- <not>
 parseWordToken ('a' : 'n' : 'd' : next) = Just (And, next) -- <and>
+parseWordToken ('a' : 's' : next) = Just (RName, next) -- <as>
 parseWordToken ('i' : 'n' : next) = Just (In, next) -- <in>
 parseWordToken ('i' : 'f' : next) = Just (If, next) -- <if>
 parseWordToken ('o' : 'r' : next) = Just (Or, next) -- <or>

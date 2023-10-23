@@ -8,4 +8,5 @@ data Literal
   | LitChar   Char
   | LitSChar  Char
   | LitInt    Int
+  | LitArray  Literal
   deriving (Show, Eq)
