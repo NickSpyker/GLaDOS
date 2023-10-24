@@ -16,9 +16,12 @@ jobs:
 
       - name: Set up GHC
         uses: haskell-actions/setup@v2
-
+      
       - name: Build
-        run: make release
+        run: make
+      
+      #- name: Run tests
+        #run: make tests_run
 
       - name: Update and retrieve package version
         id: tag
@@ -30,7 +33,10 @@ jobs:
           package_version="$(awk '/^version:/{print $2}' package.yaml)"
           echo "Package version is $package_version"
           echo "tag=$package_version" >> $GITHUB_OUTPUT
-      
+
+      - name: Create release
+        run: make release
+
       - name: Create artifact
         run: |
           package_version="$(awk '/^version:/{print $2}' package.yaml)"
@@ -43,6 +49,12 @@ jobs:
           tag_name: ${{ steps.tag.outputs.tag }}
           files: |
             glados-v${{ steps.tag.outputs.tag }}
-
-      #- name: Run tests
-        #run: make tests_run
+      
+      - name: Commit and push changes
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          git config --global user.email "nicolas.spijkerman@epitech.com"
+          git config --global user.name "Nicolas Spijkerman"
+          git add package.yaml
+          git commit -m "Bump version to $new_version"
+          git push
