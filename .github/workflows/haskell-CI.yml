@@ -20,17 +20,20 @@ jobs:
       - name: Build
         run: make release
 
-      - name: Retrieve package version
+      - name: Update and retrieve package version
         id: tag
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
-          package_version="$(cat package.yaml | grep "version:" | cut -d : -f 2 | xargs)"
+          current_version="$(awk '/^version:/{print $2}' package.yaml)"
+          new_version=$(echo $current_version | awk -F'.' '{print $1"."$2"."$3 + 1}')
+          sed -i "s/^version: $current_version/version: $new_version/" package.yaml
+          package_version="$(awk '/^version:/{print $2}' package.yaml)"
           echo "Package version is $package_version"
           echo "tag=$package_version" >> $GITHUB_OUTPUT
       
       - name: Create artifact
         run: |
-          package_version="$(cat package.yaml | grep "version:" | cut -d : -f 2 | xargs)"
+          package_version="$(awk '/^version:/{print $2}' package.yaml)"
           tar -czvf "glados-v$package_version.tar.gz" .stack-work/install
 
       - name: Create release
