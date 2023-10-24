@@ -38,8 +38,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          files: |
-              glados-v${{ steps.tag.outputs.tag }}.tar.gz
+          files: glados
   
 
       #- name: Run tests
