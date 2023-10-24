@@ -18,19 +18,19 @@ jobs:
         uses: haskell-actions/setup@v2
 
       - name: Build
-        run: make
+        run: make release
 
       - name: Retrieve package version
         id: tag
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
-          package_version="$(cat $(find . -name "package.yaml") | grep "version:" | cut -d : -f 2 | xargs)"
+          package_version="$(cat package.yaml | grep "version:" | cut -d : -f 2 | xargs)"
           echo "Package version is $package_version"
           echo "::set-output name=tag::$package_version"
       
       - name: Create artifact
         run: |
-          package_version="$(cat $(find . -name "package.yaml") | grep "version:" | cut -d : -f 2 | xargs)"
+          package_version="$(cat package.yaml | grep "version:" | cut -d : -f 2 | xargs)"
           tar -czvf "glados-v$package_version.tar.gz" .stack-work/install
       
       - name: Create release
@@ -38,7 +38,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          files: glados
+          files: glados-v$package_version
   
 
       #- name: Run tests

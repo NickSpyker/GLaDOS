@@ -11,11 +11,16 @@ TEST_PATH := $(shell stack path --dist-dir)
 COVERAGE_PATH = ./test/coverage
 TEST_NAME = ./unit_tests
 
-.PHONY: all tests_run coverage bonus clean fclean re
+VERSION := $(shell cat package.yaml | grep "version:" | cut -d : -f 2 | xargs)
+
+.PHONY: all release tests_run coverage bonus clean fclean re
 
 all:
 	@stack build --copy-bins --local-bin-path ./
 	@mv $(NAME)-exe $(NAME)
+
+release: all
+	@mv $(NAME) $(NAME)-v$(VERSION)
 
 tests_run:
 	@stack build --test --coverage
@@ -39,6 +44,7 @@ clean:
 fclean: clean
 	@$(RM) -r $(COVERAGE_PATH) ./.stack-work ./out
 	@$(RM) $(NAME) $(TEST_NAME) ./stack.yaml.lock ./glados.cabal
+	@$(RM) $(NAME)-v$(VERSION)
 	@make fclean -C ./bonus
 
 re: fclean all
