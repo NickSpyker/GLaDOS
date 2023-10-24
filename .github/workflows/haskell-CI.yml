@@ -26,20 +26,20 @@ jobs:
         run: |
           package_version="$(cat package.yaml | grep "version:" | cut -d : -f 2 | xargs)"
           echo "Package version is $package_version"
-          echo "::set-output name=tag::$package_version"
+          echo "tag=$package_version" >> $GITHUB_OUTPUT
       
       - name: Create artifact
         run: |
           package_version="$(cat package.yaml | grep "version:" | cut -d : -f 2 | xargs)"
           tar -czvf "glados-v$package_version.tar.gz" .stack-work/install
-      
+
       - name: Create release
         if: ${{ github.ref == 'refs/heads/main' }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          files: glados-v$package_version
-  
+          files: |
+            glados-v${{ steps.tag.outputs.tag }}
 
       #- name: Run tests
         #run: make tests_run
