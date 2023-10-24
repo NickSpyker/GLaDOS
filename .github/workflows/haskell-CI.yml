@@ -56,5 +56,5 @@ jobs:
           git config --global user.email "nicolas.spijkerman@epitech.com"
           git config --global user.name "Nicolas Spijkerman"
           git add package.yaml
-          git commit -m "Bump version to ${{ steps.tag.outputs.tag }}
+          git commit -m "Bump version to ${{ steps.tag.outputs.tag }}"
           git push
