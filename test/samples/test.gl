@@ -4,6 +4,12 @@ fun main() -> int
     let x: int = 5;
     let y: int = 4;
 
+    {
+        (
+            let x: int = 5;
+        )
+    }
+
     let res: int = add(x, y);
 
     return 0;

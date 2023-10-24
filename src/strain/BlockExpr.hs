@@ -55,11 +55,12 @@ parserBehavior acc mn (OpCrch : tokens) =
 parserBehavior acc _ (ClCrch : tokens) = Right (InHooks acc, tokens)
 ------------------------
 -- Behavior of semicolon
-parserBehavior acc _ (SmCol : tokens) = Right (Section acc, tokens)
-parserBehavior acc mn (token : tokens)
-  | token `elem` [Var, Const, Return, DeclType, Import] =
-      case parserBehavior [] mn tokens of
-        Left err -> Left err
-        Right (Section bexpr, next) -> parserBehavior (acc ++ [Section (Expr token : bexpr)]) mn next
-        _ -> Left $ "<Expected ';'> #" ++ show tokens ++ "#"
-  | otherwise = parserBehavior (acc ++ [Expr token]) mn tokens
+parserBehavior acc mn (SmCol : tokens) = parserBehavior (parseSmColInAcc (reverse acc) []) mn tokens 
+parserBehavior acc mn (token : tokens) = parserBehavior (acc ++ [Expr token]) mn tokens
+
+
+parseSmColInAcc :: [BExpr] -> [BExpr] -> [BExpr]
+parseSmColInAcc []  []  = []
+parseSmColInAcc []  new = [Section new]
+parseSmColInAcc (Expr tok : old) new = parseSmColInAcc old (Expr tok : new)
+parseSmColInAcc (other    : old) new = reverse (other : old) ++ [Section new]
