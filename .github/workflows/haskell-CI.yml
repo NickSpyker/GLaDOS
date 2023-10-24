@@ -6,14 +6,41 @@ on:
   pull_request:
     branches: ["main"]
 
+permissions: write-all
+
 jobs:
   build:   
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Set up GHC
+        uses: haskell-actions/setup@v2
 
       - name: Build
         run: make
+
+      - name: Retrieve package version
+        id: tag
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          package_version="$(cat $(find . -name "package.yaml") | grep "version:" | cut -d : -f 2 | xargs)"
+          echo "Package version is $package_version"
+          echo "::set-output name=tag::$package_version"
+      
+      - name: Create artifact
+        run: |
+          package_version="$(cat $(find . -name "package.yaml") | grep "version:" | cut -d : -f 2 | xargs)"
+          tar -czvf "glados-v$package_version.tar.gz" .stack-work/install
+      
+      - name: Create release
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          files: |
+              glados-v${{ steps.tag.outputs.tag }}.tar.gz
+  
 
       #- name: Run tests
         #run: make tests_run
