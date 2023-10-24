@@ -27,8 +27,7 @@ tokensToBlock = tokensToBlock'
 
 
 parserBehavior :: [BExpr] -> String -> [Token] -> Either String (BExpr, [Token])
-parserBehavior [expr] _ [] = Right (expr, [])
-parserBehavior [] _ [] = Left "<Invalid end of file> ##"
+parserBehavior [] _  [] = Left "<Invalid end of file> #@#"
 parserBehavior ls mn [] = Right (Module mn ls, [])
 ----------------------------
 -- Behavior of curly bracket
