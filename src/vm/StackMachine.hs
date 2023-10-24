@@ -49,7 +49,7 @@ exec args (Call : next) (d : stack) env =
     Left  err -> Left err
     Right re  -> exec args next re env
 exec args (JumpIfFalse n : next) (Bool False : stack) env = exec args (drop n next) stack env
-exec args (JumpIfFalse n : next) stack env = exec args next stack env
+exec args (JumpIfFalse _ : next) stack env = exec args next stack env
 exec args (PushArg index : next) stack env
   | length args <= index = Left $ "invalid arg call, try to get arg " ++ show index ++ ", with only " ++ show (length args) ++ " arguments"
   | otherwise = exec args next (args !! index : stack) env
@@ -74,7 +74,7 @@ exeOp (Fun insts) stack env =
   case exec stack insts [] env of
     Left  err    -> Left err
     Right output -> Right [output]
-exeOp Div    (Int  x : Int  0 :    _) _ = Left "division by 0"
+exeOp Div    (Int  _ : Int  0 :    _) _ = Left "division by 0"
 exeOp Eq     (Int  x : Int  y : next) _ = Right $ Bool (x == y) : next
 exeOp Eq     (Bool x : Bool y : next) _ = Right $ Bool (x == y) : next
 exeOp LessTo (Int  x : Int  y : next) _ = Right $ Bool (x <  y) : next
@@ -91,5 +91,5 @@ exeOp op     (Int  x : Int  y : next) _ =
         Mul -> Right (*)
         Div -> Right div
         _   -> Left $ "invalid operator " ++ show op
-exeOp op (a : b : _) _ = Left $ "invalid operation with " ++ show a ++ " and " ++ show b
-exeOp _ stack _        = Left $ "invalid number of Call arguments, got " ++ show (length stack) ++ ", but expected 2"
+exeOp _ (a : b : _) _ = Left $ "invalid operation with " ++ show a ++ " and " ++ show b
+exeOp _ stack _       = Left $ "invalid number of Call arguments, got " ++ show (length stack) ++ ", but expected 2"
