@@ -55,7 +55,13 @@ handleInput (Just input) = handleInput' $ trim input
                 Right block -> printDebugBlockExpression block >> promptLoop
       | "!ast "       `isPrefixOf` text = outputStrLn (drop  5 text) >> promptLoop
       | "!bytecode "  `isPrefixOf` text = outputStrLn (drop 10 text) >> promptLoop
-      | otherwise = outputStrLn text >> promptLoop
+      | otherwise =
+          case tokenize text of
+            Left  err    -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop
+            Right tokens ->
+              case tokensToBlock "Interpreter" tokens of
+                Left  err   -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop
+                Right block -> printDebugBlockExpression block >> promptLoop
 
 
 multiLinePrompt :: String -> InputT IO ()
