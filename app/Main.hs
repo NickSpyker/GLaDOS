@@ -4,6 +4,7 @@ module Main (main, handleArgs, launchInterpreter, launchCompiler) where
 import Lib (getFilesContent, haveElemOf, rmOcc)
 import BlockExpr (BExpr(..), tokensToBlock)
 import System.Environment (getArgs)
+import Prompt (launchPrompt)
 import Usage (printHelp)
 import Lexer (tokenize)
 
@@ -39,7 +40,10 @@ buildAstTree = buildAstTree' []
 
 
 launchInterpreter :: [String] -> [String] -> IO ()
-launchInterpreter paths files = print $ buildAstTree paths files
+launchInterpreter paths files =
+  case buildAstTree paths files of
+    Left err -> putStrLn err
+    Right expr -> launchPrompt expr
 
 
 launchCompiler :: [String] -> [String] -> IO ()

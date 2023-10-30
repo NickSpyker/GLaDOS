@@ -21,8 +21,8 @@ library:
     - src/vm
     - src/strain
     - src/interpreter
-  #dependencies:
-    #- add dependencies here
+  dependencies:
+    - haskeline
 
 executables:
   glados-exe:
