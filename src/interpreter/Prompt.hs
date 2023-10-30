@@ -3,11 +3,11 @@ module Prompt (launchPrompt) where
 
 import System.Console.Haskeline (runInputT, defaultSettings, historyFile, autoAddHistory, InputT, getInputLine, outputStrLn)
 import DebugOutput (printDebugTokens, printDebugBlockExpression)
+import Data.List (isPrefixOf, isSubsequenceOf)
 import PromptUsage (printPromptHelp)
 import Data.Version (showVersion)
 import BlockExpr (tokensToBlock)
 import Paths_glados (version)
-import Data.List (isPrefixOf)
 import BlockExpr (BExpr)
 import System.Info (os)
 import Lexer (tokenize)
@@ -41,6 +41,7 @@ handleInput (Just input) = handleInput' $ trim input
     handleInput' "!help" = printPromptHelp >> promptLoop
     handleInput' "!exit" = outputStrLn "\nLeaving GLaDOS" >> return ()
     handleInput' text
+      | "!ml" `isPrefixOf` text = multiLinePrompt $ drop 3 text
       | "!tokens "    `isPrefixOf` text =
           case tokenize (drop 8 text) of
             Left  err    -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop
@@ -55,3 +56,14 @@ handleInput (Just input) = handleInput' $ trim input
       | "!ast "       `isPrefixOf` text = outputStrLn (drop  5 text) >> promptLoop
       | "!bytecode "  `isPrefixOf` text = outputStrLn (drop 10 text) >> promptLoop
       | otherwise = outputStrLn text >> promptLoop
+
+
+multiLinePrompt :: String -> InputT IO ()
+multiLinePrompt acc
+  | "!end" `isSubsequenceOf` acc = handleInput $ Just $ take (length acc - 4) acc
+  | acc `elem` ["!tokens", "!blockexpr", "!ast"] = multiLinePrompt $ acc ++ " "
+  | otherwise = getInputLine "" >>= multiLinePrompt'
+  where
+    multiLinePrompt' :: Maybe String -> InputT IO ()
+    multiLinePrompt'  Nothing     = outputStrLn "\nLeaving GLaDOS" >> return ()
+    multiLinePrompt' (Just input) = multiLinePrompt $ acc ++ input
