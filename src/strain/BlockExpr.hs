@@ -5,13 +5,13 @@ import Lexer (Token(..))
 
 
 data BExpr
-  = Program  [BExpr]         -- all files, a list of modules
-  | Module    String [BExpr] -- one file, filename and code
-  | InBraces [BExpr]         -- { this }
-  | InPrths  [BExpr]         -- ( this )
-  | InHooks  [BExpr]         -- [ this ]
-  | Section  [BExpr]         -- BIDING_OR_CALL_TOKEN this ;
-  | Expr      Token          -- anything
+  = BEProgram  [BExpr]         -- all files, a list of BModules
+  | BEModule    String [BExpr] -- one file, filename and code
+  | BEInBraces [BExpr]         -- { this }
+  | BEInPrths  [BExpr]         -- ( this )
+  | BEInHooks  [BExpr]         -- [ this ]
+  | BESection  [BExpr]         -- BIDING_OR_CALL_TOKEN this ;
+  | BEExpr      Token          -- anything
   deriving (Show, Eq)
 
 
@@ -23,43 +23,43 @@ tokensToBlock = tokensToBlock'
       case parserBehavior [] mn tks of
         Left err          -> Left err
         Right (bexpr, []) -> Right bexpr
-        Right (_, mi)     -> Left $ "<Missing section> #" ++ show mi ++ "#"
+        Right (_, mi)     -> Left $ "<Missing BEsection> #" ++ show mi ++ "#"
 
 
 parserBehavior :: [BExpr] -> String -> [Token] -> Either String (BExpr, [Token])
 parserBehavior [] _  [] = Left "<Invalid end of file> #@#"
-parserBehavior ls mn [] = Right (Module mn ls, [])
+parserBehavior ls mn [] = Right (BEModule mn ls, [])
 ----------------------------
 -- Behavior of curly bracket
-parserBehavior acc mn (OpCrlBr : tokens) =
+parserBehavior acc mn (TokOpCrlBr : tokens) =
   case parserBehavior [] mn tokens of
     Left err -> Left err
-    Right (InBraces bexpr, next) -> parserBehavior (acc ++ [InBraces bexpr]) mn next
+    Right (BEInBraces bexpr, next) -> parserBehavior (acc ++ [BEInBraces bexpr]) mn next
     _ -> Left $ "<Expected '}'> #" ++ show tokens ++ "#"
-parserBehavior acc _ (ClCrlBr : tokens) = Right (InBraces acc, tokens)
+parserBehavior acc _ (TokClCrlBr : tokens) = Right (BEInBraces acc, tokens)
 --------------------------
 -- Behavior of parentheses
-parserBehavior acc mn (OpPrth : tokens) =
+parserBehavior acc mn (TokOpPrth : tokens) =
   case parserBehavior [] mn tokens of
     Left err -> Left err
-    Right (InPrths bexpr, next) -> parserBehavior (acc ++ [InPrths bexpr]) mn next
+    Right (BEInPrths bexpr, next) -> parserBehavior (acc ++ [BEInPrths bexpr]) mn next
     _ -> Left $ "<Expected ')'> #" ++ show tokens ++ "#"
-parserBehavior acc _ (ClPrth : tokens) = Right (InPrths acc, tokens)
+parserBehavior acc _ (TokClPrth : tokens) = Right (BEInPrths acc, tokens)
 --------------------
 -- Behavior of hooks
-parserBehavior acc mn (OpCrch : tokens) =
+parserBehavior acc mn (TokOpCrch : tokens) =
   case parserBehavior [] mn tokens of
     Left err -> Left err
-    Right (InHooks bexpr, next) -> parserBehavior (acc ++ [InHooks bexpr]) mn next
+    Right (BEInHooks bexpr, next) -> parserBehavior (acc ++ [BEInHooks bexpr]) mn next
     _ -> Left $ "<Expected ']'> #" ++ show tokens ++ "#"
-parserBehavior acc _ (ClCrch : tokens) = Right (InHooks acc, tokens)
+parserBehavior acc _ (TokClCrch : tokens) = Right (BEInHooks acc, tokens)
 ------------------------
 -- Behavior of semicolon
-parserBehavior acc mn (SmCol : tokens) = parserBehavior (parseSmColInAcc (reverse acc) []) mn tokens
+parserBehavior acc mn (TokSmCol : tokens) = parserBehavior (parseSmColInAcc (reverse acc) []) mn tokens
   where
     parseSmColInAcc :: [BExpr] -> [BExpr] -> [BExpr]
     parseSmColInAcc []  []  = []
-    parseSmColInAcc []  new = [Section new]
-    parseSmColInAcc (Expr tok : old) new = parseSmColInAcc old (Expr tok : new)
-    parseSmColInAcc (other    : old) new = reverse (other : old) ++ [Section new]
-parserBehavior acc mn (token : tokens) = parserBehavior (acc ++ [Expr token]) mn tokens
+    parseSmColInAcc []  new = [BESection new]
+    parseSmColInAcc (BEExpr tok : old) new = parseSmColInAcc old (BEExpr tok : new)
+    parseSmColInAcc (other    : old) new = reverse (other : old) ++ [BESection new]
+parserBehavior acc mn (token : tokens) = parserBehavior (acc ++ [BEExpr token]) mn tokens

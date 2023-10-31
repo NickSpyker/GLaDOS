@@ -1,6 +1,7 @@
 module ParserAST (buildASTtree, Ast(..)) where
 
 
+import Lexer (Token(..))
 import BlockExpr (BExpr(..))
 import Data (Literal(..))
 
@@ -59,4 +60,39 @@ data Ast
 
 
 buildASTtree :: BExpr -> Either String Ast
-buildASTtree _ = Right None
+buildASTtree (BEProgram exprs) =
+  case parseAST [] exprs of
+    Left  err -> Left err
+    Right (Section ast) -> Right $ Program ast
+    Right ast -> Right $ Program [ast]
+buildASTtree (BEModule name exprs) =
+  case parseAST [] exprs of
+    Left  err -> Left err
+    Right ast -> Right $ Module name ast
+buildASTtree (BEInBraces exprs) =
+  case parseAST [] exprs of
+    Left  err -> Left err
+    Right ast -> Right ast
+buildASTtree (BEInPrths exprs) =
+  case parseAST [] exprs of
+    Left  err -> Left err
+    Right ast -> Right ast
+buildASTtree (BEInHooks exprs) =
+  case parseAST [] exprs of
+    Left  err -> Left err
+    Right ast -> Right ast
+buildASTtree (BESection exprs) =
+  case parseAST [] exprs of
+    Left  err -> Left err
+    Right ast -> Right ast
+buildASTtree (BEExpr (TokLit lit))  = Right $ Value lit
+buildASTtree (BEExpr (TokIde name)) = Left  $ "<Identifier without action> #" ++ name ++ "#"
+buildASTtree (BEExpr expr)          = Left  $ "<Misplaced item> #" ++ show expr ++ "#"
+
+
+parseAST :: [Ast] -> [BExpr] -> Either String Ast
+parseAST acc [] = Right $ Section acc
+parseAST acc (expr : next) =
+  case buildASTtree expr of
+    Left  err -> Left err
+    Right ast -> parseAST (acc ++ [ast]) next

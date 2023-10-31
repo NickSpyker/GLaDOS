@@ -17,9 +17,12 @@ printDebugTokens tokens = outputStr "\nTokens:\n  " >> printDebugTokens' tokens 
 
 
 printDebugBlockExpression :: BExpr -> InputT IO ()
-printDebugBlockExpression (BlockExpr.Program  bexprs) = outputStr "\nBlock Expression:\n  " >> printDebugBlockExpression'  bexprs  >> outputStrLn "\n"
-printDebugBlockExpression (BlockExpr.Module _ bexprs) = outputStr "\nBlock Expression:\n  " >> printDebugBlockExpression'  bexprs  >> outputStrLn "\n"
-printDebugBlockExpression bexprs                      = outputStr "\nBlock Expression:\n  " >> printDebugBlockExpression' [bexprs] >> outputStrLn "\n"
+printDebugBlockExpression (BEProgram  bexprs)    = outputStr "\nBlock Expression (Program):\n  "
+  >> printDebugBlockExpression'  bexprs  >> outputStrLn "\n"
+printDebugBlockExpression (BEModule name bexprs) = outputStr ("\nBlock Expression (Module \"" ++ name ++ "\"):\n  ")
+  >> printDebugBlockExpression'  bexprs  >> outputStrLn "\n"
+printDebugBlockExpression bexprs                         = outputStr "\nBlock Expression:\n  "
+  >> printDebugBlockExpression' [bexprs] >> outputStrLn "\n"
 
 printDebugBlockExpression' :: [BExpr] -> InputT IO ()
 printDebugBlockExpression' []          = return ()
@@ -28,4 +31,4 @@ printDebugBlockExpression' (br : next) = printDebugBlockExpression' [br] >> outp
 
 
 printDebugAst :: Ast -> InputT IO ()
-printDebugAst ast = outputStrLn $ show ast
+printDebugAst ast = outputStrLn $ "\nAST tree:\n  " ++ show ast ++ "\n"

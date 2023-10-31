@@ -1,7 +1,7 @@
 module Prompt (launchPrompt) where
 
 
-import System.Console.Haskeline (runInputT, defaultSettings, historyFile, autoAddHistory, InputT, getInputLine, outputStrLn)
+import System.Console.Haskeline (runInputT, defaultSettings, historyFile, autoAddHistory, InputT, getInputLine, outputStrLn, outputStr)
 import DebugOutput (printDebugTokens, printDebugBlockExpression, printDebugAst)
 import Strain (getTokens, getBlockExpr, getAst)
 import Data.List (isPrefixOf, isSubsequenceOf)
@@ -37,8 +37,10 @@ handleInput  Nothing     = outputStrLn "\nLeaving GLaDOS"
 handleInput (Just input) = handleInput' $ trim input
   where
     handleInput' :: String -> InputT IO ()
-    handleInput' "!help" = printPromptHelp >> promptLoop
-    handleInput' "!exit" = outputStrLn "\nLeaving GLaDOS"
+    handleInput' ""       = promptLoop
+    handleInput' "!help"  = printPromptHelp >> promptLoop
+    handleInput' "!exit"  = outputStrLn "\nLeaving GLaDOS"
+    handleInput' "!clear" = clearScreen >> promptLoop
     handleInput' text
       | "!ml" `isPrefixOf` text = multiLinePrompt $ drop 3 text
       | "!tokens "    `isPrefixOf` text =
@@ -58,6 +60,10 @@ handleInput (Just input) = handleInput' $ trim input
           case getAst "Interpreter" text of
             Left  err -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop
             Right ast -> printDebugAst ast >> promptLoop
+
+
+clearScreen :: InputT IO ()
+clearScreen = outputStr "\ESC[H\ESC[2J"
 
 
 multiLinePrompt :: String -> InputT IO ()

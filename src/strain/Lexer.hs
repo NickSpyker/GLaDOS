@@ -7,61 +7,61 @@ import Data (Literal(..))
 
 
 data Token
-  = OpPrth      -- '('
-  | ClPrth      -- ')'
-  | OpCrlBr     -- '{'
-  | ClCrlBr     -- '}'
-  | OpCrch      -- '['
-  | ClCrch      -- ']
-  | SmCol       -- ';'
-  | Col         -- ':'
-  | DCol        -- "::"
-  | Dot         -- '.'
-  | Com         -- ','
-  | BckSlsh     -- '\'
-  | Add         -- '+'
-  | Sub         -- '-'
-  | Mul         -- '*'
-  | Div         -- '/'
-  | Mod         -- '%'
-  | Not         -- '!', "not"
-  | Asgn        -- '='
-  | And         -- "and"
-  | Or          -- "or"
-  | Fun         -- "fun"
-  | Var         -- "let"
-  | Const       -- "const"
-  | Gt          -- '>'
-  | GtEq        -- ">="
-  | Lt          -- '<'
-  | LtEq        -- "<="
-  | Eq          -- "=="
-  | NotEq       -- "!="
-  | AddAsgn     -- "+="
-  | MulAsgn     -- "*="
-  | SubAsgn     -- "-="
-  | DivAsgn     -- "/="
-  | RetTy       -- "->"
-  | For         -- "for"
-  | If          -- "if"
-  | Else        -- "else"
-  | In          -- "in"
-  | Loop        -- "loop"
-  | While       -- "while"
-  | Break       -- "break"
-  | Return      -- "return"
-  | Continue    -- "continue"
-  | TyString    -- "string"
-  | TyFloat     -- "float"
-  | TyChar      -- "char"
-  | TyInt       -- "int"
-  | DeclType    -- "type"
-  | Struct      -- "struct"
-  | Enum        -- "enum"
-  | Import      -- "use"
-  | RName       -- "as"
-  | Lit Literal -- 0-9 "*" 0-9. '*'
-  | Ide String  -- Identifiant name
+  = TokOpPrth      -- '('
+  | TokClPrth      -- ')'
+  | TokOpCrlBr     -- '{'
+  | TokClCrlBr     -- '}'
+  | TokOpCrch      -- '['
+  | TokClCrch      -- ']
+  | TokSmCol       -- ';'
+  | TokCol         -- ':'
+  | TokDCol        -- "::"
+  | TokDot         -- '.'
+  | TokCom         -- ','
+  | TokBckSlsh     -- '\'
+  | TokAdd         -- '+'
+  | TokSub         -- '-'
+  | TokMul         -- '*'
+  | TokDiv         -- '/'
+  | TokMod         -- '%'
+  | TokNot         -- '!', "not"
+  | TokAsgn        -- '='
+  | TokAnd         -- "and"
+  | TokOr          -- "or"
+  | TokFun         -- "fun"
+  | TokVar         -- "let"
+  | TokConst       -- "const"
+  | TokGt          -- '>'
+  | TokGtEq        -- ">="
+  | TokLt          -- '<'
+  | TokLtEq        -- "<="
+  | TokEq          -- "=="
+  | TokNotEq       -- "!="
+  | TokAddAsgn     -- "+="
+  | TokMulAsgn     -- "*="
+  | TokSubAsgn     -- "-="
+  | TokDivAsgn     -- "/="
+  | TokRetTy       -- "->"
+  | TokFor         -- "for"
+  | TokIf          -- "if"
+  | TokElse        -- "else"
+  | TokIn          -- "in"
+  | TokLoop        -- "loop"
+  | TokWhile       -- "while"
+  | TokBreak       -- "break"
+  | TokReturn      -- "return"
+  | TokContinue    -- "continue"
+  | TokTyString    -- "string"
+  | TokTyFloat     -- "float"
+  | TokTyChar      -- "char"
+  | TokTyInt       -- "int"
+  | TokDeclType    -- "type"
+  | TokStruct      -- "struct"
+  | TokEnum        -- "enum"
+  | TokImport      -- "use"
+  | TokRName       -- "as"
+  | TokLit Literal -- 0-9 "*" 0-9. '*'
+  | TokIde String  -- Identifiant name
   deriving (Show, Eq)
 
 
@@ -103,65 +103,65 @@ parseAllToken (parser : next) input
 
 
 parseBasicToken :: String -> Maybe (Token, String)
-parseBasicToken ('%'  : next) = Just (Mod, next)
-parseBasicToken ('('  : next) = Just (OpPrth,  next)
-parseBasicToken (')'  : next) = Just (ClPrth,  next)
-parseBasicToken ('{'  : next) = Just (OpCrlBr, next)
-parseBasicToken ('}'  : next) = Just (ClCrlBr, next)
-parseBasicToken ('['  : next) = Just (OpCrch,  next)
-parseBasicToken (']'  : next) = Just (ClCrch,  next)
-parseBasicToken (';'  : next) = Just (SmCol,   next)
-parseBasicToken ('.'  : next) = Just (Dot,     next)
-parseBasicToken (','  : next) = Just (Com,     next)
-parseBasicToken ('\\' : next) = Just (BckSlsh, next)
-parseBasicToken (':'  : ':' : next) = Just (DCol,    next)
-parseBasicToken ('-'  : '>' : next) = Just (RetTy,   next)
-parseBasicToken ('>'  : '=' : next) = Just (GtEq,    next)
-parseBasicToken ('<'  : '=' : next) = Just (LtEq,    next)
-parseBasicToken ('!'  : '=' : next) = Just (NotEq,   next)
-parseBasicToken ('='  : '=' : next) = Just (Eq,      next)
-parseBasicToken ('+'  : '=' : next) = Just (AddAsgn, next)
-parseBasicToken ('*'  : '=' : next) = Just (MulAsgn, next)
-parseBasicToken ('-'  : '=' : next) = Just (MulAsgn, next)
-parseBasicToken ('/'  : '=' : next) = Just (DivAsgn, next)
-parseBasicToken ('+'  : next) = Just (Add,  next)
-parseBasicToken ('*'  : next) = Just (Mul,  next)
-parseBasicToken ('-'  : next) = Just (Sub,  next)
-parseBasicToken ('/'  : next) = Just (Div,  next)
-parseBasicToken ('!'  : next) = Just (Not,  next)
-parseBasicToken (':'  : next) = Just (Col,  next)
-parseBasicToken ('>'  : next) = Just (Gt,   next)
-parseBasicToken ('<'  : next) = Just (Lt,   next)
-parseBasicToken ('='  : next) = Just (Asgn, next)
+parseBasicToken ('%'  : next) = Just (TokMod, next)
+parseBasicToken ('('  : next) = Just (TokOpPrth,  next)
+parseBasicToken (')'  : next) = Just (TokClPrth,  next)
+parseBasicToken ('{'  : next) = Just (TokOpCrlBr, next)
+parseBasicToken ('}'  : next) = Just (TokClCrlBr, next)
+parseBasicToken ('['  : next) = Just (TokOpCrch,  next)
+parseBasicToken (']'  : next) = Just (TokClCrch,  next)
+parseBasicToken (';'  : next) = Just (TokSmCol,   next)
+parseBasicToken ('.'  : next) = Just (TokDot,     next)
+parseBasicToken (','  : next) = Just (TokCom,     next)
+parseBasicToken ('\\' : next) = Just (TokBckSlsh, next)
+parseBasicToken (':'  : ':' : next) = Just (TokDCol,    next)
+parseBasicToken ('-'  : '>' : next) = Just (TokRetTy,   next)
+parseBasicToken ('>'  : '=' : next) = Just (TokGtEq,    next)
+parseBasicToken ('<'  : '=' : next) = Just (TokLtEq,    next)
+parseBasicToken ('!'  : '=' : next) = Just (TokNotEq,   next)
+parseBasicToken ('='  : '=' : next) = Just (TokEq,      next)
+parseBasicToken ('+'  : '=' : next) = Just (TokAddAsgn, next)
+parseBasicToken ('*'  : '=' : next) = Just (TokMulAsgn, next)
+parseBasicToken ('-'  : '=' : next) = Just (TokMulAsgn, next)
+parseBasicToken ('/'  : '=' : next) = Just (TokDivAsgn, next)
+parseBasicToken ('+'  : next) = Just (TokAdd,  next)
+parseBasicToken ('*'  : next) = Just (TokMul,  next)
+parseBasicToken ('-'  : next) = Just (TokSub,  next)
+parseBasicToken ('/'  : next) = Just (TokDiv,  next)
+parseBasicToken ('!'  : next) = Just (TokNot,  next)
+parseBasicToken (':'  : next) = Just (TokCol,  next)
+parseBasicToken ('>'  : next) = Just (TokGt,   next)
+parseBasicToken ('<'  : next) = Just (TokLt,   next)
+parseBasicToken ('='  : next) = Just (TokAsgn, next)
 parseBasicToken _ = Nothing
 
 
 parseWordToken :: String -> Maybe (Token, String)
-parseWordToken ('f' : 'a' : 'l' : 's' : 'e' : next) = Just (Lit (LitBool False), next) -- <false>
-parseWordToken ('s' : 't' : 'r' : 'i' : 'n' : 'g' : next) = Just (TyString, next) -- <string>
-parseWordToken ('s' : 't' : 'r' : 'u' : 'c' : 't' : next) = Just (Struct, next) -- <struct>
-parseWordToken ('r' : 'e' : 't' : 'u' : 'r' : 'n' : next) = Just (Return, next) -- <return>
-parseWordToken ('t' : 'r' : 'u' : 'e' : next) = Just (Lit (LitBool True), next) -- <true>
-parseWordToken ('f' : 'l' : 'o' : 'a' : 't' : next) = Just (TyFloat, next) -- <float>
-parseWordToken ('w' : 'h' : 'i' : 'l' : 'e' : next) = Just (While, next) -- <while>
-parseWordToken ('b' : 'r' : 'e' : 'a' : 'k' : next) = Just (Break, next) -- <break>
-parseWordToken ('c' : 'o' : 'n' : 's' : 't' : next) = Just (Const, next) -- <const>
-parseWordToken ('t' : 'y' : 'p' : 'e' : next) = Just (DeclType, next) -- <type>
-parseWordToken ('c' : 'h' : 'a' : 'r' : next) = Just (TyChar, next) -- <char>
-parseWordToken ('e' : 'n' : 'u' : 'm' : next) = Just (Enum, next) -- <enum>
-parseWordToken ('l' : 'o' : 'o' : 'p' : next) = Just (Loop, next) -- <loop>
-parseWordToken ('e' : 'l' : 's' : 'e' : next) = Just (Else, next) -- <else>
-parseWordToken ('u' : 's' : 'e' : next) = Just (Import, next) -- <use>
-parseWordToken ('i' : 'n' : 't' : next) = Just (TyInt, next) -- <int>
-parseWordToken ('f' : 'u' : 'n' : next) = Just (Fun, next) -- <fun>
-parseWordToken ('f' : 'o' : 'r' : next) = Just (For, next) -- <for>
-parseWordToken ('l' : 'e' : 't' : next) = Just (Var, next) -- <let>
-parseWordToken ('n' : 'o' : 't' : next) = Just (Not, next) -- <not>
-parseWordToken ('a' : 'n' : 'd' : next) = Just (And, next) -- <and>
-parseWordToken ('a' : 's' : next) = Just (RName, next) -- <as>
-parseWordToken ('i' : 'n' : next) = Just (In, next) -- <in>
-parseWordToken ('i' : 'f' : next) = Just (If, next) -- <if>
-parseWordToken ('o' : 'r' : next) = Just (Or, next) -- <or>
+parseWordToken ('f' : 'a' : 'l' : 's' : 'e' : next) = Just (TokLit (LitBool False), next) -- <false>
+parseWordToken ('s' : 't' : 'r' : 'i' : 'n' : 'g' : next) = Just (TokTyString, next) -- <string>
+parseWordToken ('s' : 't' : 'r' : 'u' : 'c' : 't' : next) = Just (TokStruct, next) -- <struct>
+parseWordToken ('r' : 'e' : 't' : 'u' : 'r' : 'n' : next) = Just (TokReturn, next) -- <return>
+parseWordToken ('t' : 'r' : 'u' : 'e' : next) = Just (TokLit (LitBool True), next) -- <true>
+parseWordToken ('f' : 'l' : 'o' : 'a' : 't' : next) = Just (TokTyFloat, next) -- <float>
+parseWordToken ('w' : 'h' : 'i' : 'l' : 'e' : next) = Just (TokWhile, next) -- <while>
+parseWordToken ('b' : 'r' : 'e' : 'a' : 'k' : next) = Just (TokBreak, next) -- <break>
+parseWordToken ('c' : 'o' : 'n' : 's' : 't' : next) = Just (TokConst, next) -- <const>
+parseWordToken ('t' : 'y' : 'p' : 'e' : next) = Just (TokDeclType, next) -- <type>
+parseWordToken ('c' : 'h' : 'a' : 'r' : next) = Just (TokTyChar, next) -- <char>
+parseWordToken ('e' : 'n' : 'u' : 'm' : next) = Just (TokEnum, next) -- <enum>
+parseWordToken ('l' : 'o' : 'o' : 'p' : next) = Just (TokLoop, next) -- <loop>
+parseWordToken ('e' : 'l' : 's' : 'e' : next) = Just (TokElse, next) -- <else>
+parseWordToken ('u' : 's' : 'e' : next) = Just (TokImport, next) -- <use>
+parseWordToken ('i' : 'n' : 't' : next) = Just (TokTyInt, next) -- <int>
+parseWordToken ('f' : 'u' : 'n' : next) = Just (TokFun, next) -- <fun>
+parseWordToken ('f' : 'o' : 'r' : next) = Just (TokFor, next) -- <for>
+parseWordToken ('l' : 'e' : 't' : next) = Just (TokVar, next) -- <let>
+parseWordToken ('n' : 'o' : 't' : next) = Just (TokNot, next) -- <not>
+parseWordToken ('a' : 'n' : 'd' : next) = Just (TokAnd, next) -- <and>
+parseWordToken ('a' : 's' : next) = Just (TokRName, next) -- <as>
+parseWordToken ('i' : 'n' : next) = Just (TokIn, next) -- <in>
+parseWordToken ('i' : 'f' : next) = Just (TokIf, next) -- <if>
+parseWordToken ('o' : 'r' : next) = Just (TokOr, next) -- <or>
 parseWordToken _ = Nothing
 
 
@@ -171,19 +171,22 @@ parseLitToken = parseLitToken' []
     parseLitToken' :: String -> String -> Maybe (Token, String)
     parseLitToken' []  [] = Nothing
     parseLitToken' acc []
-      | isNumber acc      = Just (Lit (LitInt   (read acc)), [])
-      | isNumberOrDot acc = Just (Lit (LitFloat (read acc)), [])
+      | isNumber acc      = Just (TokLit (LitInt   (read acc)), [])
+      | isNumberOrDot acc = Just (TokLit (LitFloat (read acc)), [])
       | otherwise         = Nothing
-    parseLitToken' [] ('\'' : '\\' : c : '\'' : next) = Just (Lit (LitSChar c), next)
-    parseLitToken' [] ('\'' :        c : '\'' : next) = Just (Lit (LitChar  c), next)
+    parseLitToken' [] ('\'' : '\\' : c : '\'' : next) = Just (TokLit (LitSChar c), next)
+    parseLitToken' [] ('\'' :        c : '\'' : next) = Just (TokLit (LitChar  c), next)
     parseLitToken' [] ('"' : next) =
       case extractBtwQuot ('"' : next) of
-        Just str -> Just (Lit (LitString str), drop (length str + 2) next)
+        Just str -> Just (TokLit (LitString str), drop (length str + 2) next)
         Nothing  -> Nothing
+    parseLitToken' [] (c : next)
+      | isNumberOrDot [c] = parseLitToken' [c] next
+      | otherwise         = Nothing
     parseLitToken' acc (c : next)
       | isNumberOrDot [c] && isNumberOrDot acc = parseLitToken' (c : acc) next
-      | isNumber acc      = Just (Lit (LitInt   (read acc)), next)
-      | isNumberOrDot acc = Just (Lit (LitFloat (read acc)), next)
+      | isNumber acc      = Just (TokLit (LitInt   (read acc)), next)
+      | isNumberOrDot acc = Just (TokLit (LitFloat (read acc)), next)
       | otherwise         = Nothing
 
 
@@ -195,8 +198,8 @@ parseIdeToken (c : next)
   where
     parseIdeToken' :: String -> String -> Maybe (Token, String)
     parseIdeToken' []  [] = Nothing
-    parseIdeToken' acc [] = Just (Ide acc, [])
+    parseIdeToken' acc [] = Just (TokIde acc, [])
     parseIdeToken' acc ('_' : n) = parseIdeToken' (acc ++ ['_']) n
     parseIdeToken' acc ( cb : n)
       | isAlphaNum cb = parseIdeToken' (acc ++ [cb]) n
-      | otherwise     = Just (Ide acc, cb : n)
+      | otherwise     = Just (TokIde acc, cb : n)
