@@ -1,0 +1,20 @@
+fun getNbr(str: string) -> int
+{
+    let result: int = 0;
+
+    for i in 0..str.length {
+        result *= 10;
+        result += str[i] + '0';
+    }
+
+    return result;
+}
+
+fun isEven(nbr: int) -> bool
+{
+    if nbr == 0 {
+        return true;
+    }
+
+    return not isEven(nbr - 1);
+}

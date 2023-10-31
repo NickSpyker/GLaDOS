@@ -1,8 +1,9 @@
-module DebugOutput (printDebugTokens, printDebugBlockExpression) where
+module DebugOutput (printDebugTokens, printDebugBlockExpression, printDebugAst) where
 
 
-import System.Console.Haskeline
+import System.Console.Haskeline (outputStr, outputStrLn, InputT)
 import BlockExpr (BExpr(..))
+import ParserAST (Ast(..))
 import Lexer (Token(..))
 
 
@@ -16,11 +17,15 @@ printDebugTokens tokens = outputStr "\nTokens:\n  " >> printDebugTokens' tokens 
 
 
 printDebugBlockExpression :: BExpr -> InputT IO ()
-printDebugBlockExpression (Program  bexprs) = outputStr "\nBlock Expression:\n  " >> printDebugBlockExpression'  bexprs  >> outputStrLn "\n"
-printDebugBlockExpression (Module _ bexprs) = outputStr "\nBlock Expression:\n  " >> printDebugBlockExpression'  bexprs  >> outputStrLn "\n"
-printDebugBlockExpression bexprs            = outputStr "\nBlock Expression:\n  " >> printDebugBlockExpression' [bexprs] >> outputStrLn "\n"
+printDebugBlockExpression (Program  bexprs)           = outputStr "\nBlock Expression:\n  " >> printDebugBlockExpression'  bexprs  >> outputStrLn "\n"
+printDebugBlockExpression (BlockExpr.Module _ bexprs) = outputStr "\nBlock Expression:\n  " >> printDebugBlockExpression'  bexprs  >> outputStrLn "\n"
+printDebugBlockExpression bexprs                      = outputStr "\nBlock Expression:\n  " >> printDebugBlockExpression' [bexprs] >> outputStrLn "\n"
 
 printDebugBlockExpression' :: [BExpr] -> InputT IO ()
 printDebugBlockExpression' []          = return ()
 printDebugBlockExpression' [br]        = outputStr $ show br
 printDebugBlockExpression' (br : next) = printDebugBlockExpression' [br] >> outputStr " ↦ " >> printDebugBlockExpression' next
+
+
+printDebugAst :: Ast -> InputT IO ()
+printDebugAst ast = outputStrLn $ show ast

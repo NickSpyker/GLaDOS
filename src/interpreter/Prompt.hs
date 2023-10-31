@@ -2,15 +2,14 @@ module Prompt (launchPrompt) where
 
 
 import System.Console.Haskeline (runInputT, defaultSettings, historyFile, autoAddHistory, InputT, getInputLine, outputStrLn)
-import DebugOutput (printDebugTokens, printDebugBlockExpression)
+import DebugOutput (printDebugTokens, printDebugBlockExpression, printDebugAst)
+import Strain (getTokens, getBlockExpr, getAst)
 import Data.List (isPrefixOf, isSubsequenceOf)
 import PromptUsage (printPromptHelp)
 import Data.Version (showVersion)
-import BlockExpr (tokensToBlock)
 import Paths_glados (version)
 import BlockExpr (BExpr)
 import System.Info (os)
-import Lexer (tokenize)
 import Lib (trim)
 
 
@@ -34,34 +33,31 @@ promptLoop = getInputLine "GLaDOS> " >>= handleInput
 
 
 handleInput :: Maybe String -> InputT IO ()
-handleInput  Nothing     = outputStrLn "\nLeaving GLaDOS" >> return ()
+handleInput  Nothing     = outputStrLn "\nLeaving GLaDOS"
 handleInput (Just input) = handleInput' $ trim input
   where
     handleInput' :: String -> InputT IO ()
     handleInput' "!help" = printPromptHelp >> promptLoop
-    handleInput' "!exit" = outputStrLn "\nLeaving GLaDOS" >> return ()
+    handleInput' "!exit" = outputStrLn "\nLeaving GLaDOS"
     handleInput' text
       | "!ml" `isPrefixOf` text = multiLinePrompt $ drop 3 text
       | "!tokens "    `isPrefixOf` text =
-          case tokenize (drop 8 text) of
+          case getTokens (drop 8 text) of
             Left  err    -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop
             Right tokens -> printDebugTokens tokens >> promptLoop
       | "!blockexpr " `isPrefixOf` text =
-          case tokenize (drop 11 text) of
-            Left  err    -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop
-            Right tokens ->
-              case tokensToBlock "Interpreter" tokens of
-                Left  err   -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop
-                Right block -> printDebugBlockExpression block >> promptLoop
-      | "!ast "       `isPrefixOf` text = outputStrLn (drop  5 text) >> promptLoop
+          case getBlockExpr "Interpreter" (drop 11 text) of
+            Left  err   -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop
+            Right block -> printDebugBlockExpression block >> promptLoop
+      | "!ast "       `isPrefixOf` text =
+          case getAst "Interpreter" (drop 5 text) of
+            Left  err -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop
+            Right ast -> printDebugAst ast >> promptLoop
       | "!bytecode "  `isPrefixOf` text = outputStrLn (drop 10 text) >> promptLoop
       | otherwise =
-          case tokenize text of
-            Left  err    -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop
-            Right tokens ->
-              case tokensToBlock "Interpreter" tokens of
-                Left  err   -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop
-                Right block -> printDebugBlockExpression block >> promptLoop
+          case getAst "Interpreter" text of
+            Left  err -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop
+            Right ast -> printDebugAst ast >> promptLoop
 
 
 multiLinePrompt :: String -> InputT IO ()
@@ -71,5 +67,5 @@ multiLinePrompt acc
   | otherwise = getInputLine "" >>= multiLinePrompt'
   where
     multiLinePrompt' :: Maybe String -> InputT IO ()
-    multiLinePrompt'  Nothing     = outputStrLn "\nLeaving GLaDOS" >> return ()
+    multiLinePrompt'  Nothing     = outputStrLn "\nLeaving GLaDOS"
     multiLinePrompt' (Just input) = multiLinePrompt $ acc ++ input

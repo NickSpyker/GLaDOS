@@ -1,0 +1,40 @@
+// use folder_name::folder_name::file_name::function_name;
+// use folder_name::folder_name::file_name::*; <- import all functions
+use tools::getNbr;
+// rename the import with "as new_name"
+use tools::isEven as is_even;
+
+
+type ArrayOfString = string[];
+
+enum Status {
+    Init,
+    Running
+}
+
+struct Position {
+    x: float,
+    y: float
+}
+
+
+// args contains the name of the binary at index 0
+fun main(args: ArrayOfString) -> int
+{
+    if (args.length != 2) {
+        return 84;
+    }
+
+    let str_nbr: string = args[1];
+
+    let nbr: int = getNbr(str_nbr);
+
+    print(str_nbr);
+    if (is_even(nbr)) {
+        println(" is even");
+    } else {
+        println(" is not even");
+    }
+
+    return 0;
+}
