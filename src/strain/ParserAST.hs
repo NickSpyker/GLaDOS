@@ -47,7 +47,8 @@ data Control
 
 
 data Ast
-  = Value    Literal
+  = Program  [Ast]
+  | Value    Literal
   | Module   String Ast
   | Section  [Ast]
   | Binding  AstBinding

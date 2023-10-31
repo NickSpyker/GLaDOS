@@ -8,12 +8,12 @@ import Data.List (isPrefixOf, isSubsequenceOf)
 import PromptUsage (printPromptHelp)
 import Data.Version (showVersion)
 import Paths_glados (version)
-import BlockExpr (BExpr)
 import System.Info (os)
+import ParserAST (Ast)
 import Lib (trim)
 
 
-launchPrompt :: BExpr -> IO ()
+launchPrompt :: Ast -> IO ()
 launchPrompt _ = printHeader >> runInputT
   defaultSettings { historyFile = Just ".glados_history", autoAddHistory = True }
   promptLoop

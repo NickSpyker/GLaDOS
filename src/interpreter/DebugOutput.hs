@@ -17,7 +17,7 @@ printDebugTokens tokens = outputStr "\nTokens:\n  " >> printDebugTokens' tokens 
 
 
 printDebugBlockExpression :: BExpr -> InputT IO ()
-printDebugBlockExpression (Program  bexprs)           = outputStr "\nBlock Expression:\n  " >> printDebugBlockExpression'  bexprs  >> outputStrLn "\n"
+printDebugBlockExpression (BlockExpr.Program  bexprs) = outputStr "\nBlock Expression:\n  " >> printDebugBlockExpression'  bexprs  >> outputStrLn "\n"
 printDebugBlockExpression (BlockExpr.Module _ bexprs) = outputStr "\nBlock Expression:\n  " >> printDebugBlockExpression'  bexprs  >> outputStrLn "\n"
 printDebugBlockExpression bexprs                      = outputStr "\nBlock Expression:\n  " >> printDebugBlockExpression' [bexprs] >> outputStrLn "\n"
 

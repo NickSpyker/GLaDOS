@@ -2,11 +2,11 @@ module Main (main, handleArgs, launchInterpreter, launchCompiler) where
 
 
 import Lib (getFilesContent, haveElemOf, rmOcc)
-import BlockExpr (BExpr(..), tokensToBlock)
 import System.Environment (getArgs)
 import Prompt (launchPrompt)
+import ParserAST (Ast(..))
 import Usage (printHelp)
-import Lexer (tokenize)
+import Strain (getAst)
 
 
 main :: IO ()
@@ -24,27 +24,27 @@ handleArgs input
       getFilesContent input >>= either putStrLn (launchCompiler input)
 
 
-buildAstTree :: [String] -> [String] -> Either String BExpr
+buildAstTree :: [String] -> [String] -> Either String Ast
 buildAstTree = buildAstTree' []
   where
-    buildAstTree' :: [BExpr] -> [String] -> [String] -> Either String BExpr
+    buildAstTree' :: [Ast] -> [String] -> [String] -> Either String Ast
     buildAstTree' acc _ [] = Right $ Program acc
     buildAstTree' acc (path : paths) (file : files) =
-      case tokenize file of
-        Left err     -> Left err
-        Right tokens ->
-          case tokensToBlock path tokens of
-            Left err -> Left err
-            Right mo -> buildAstTree' (acc ++ [mo]) paths files
+      case getAst path file of
+        Left  err -> Left err
+        Right ast -> buildAstTree' (acc ++ [ast]) paths files
     buildAstTree' _ _ _ = Left "unhandled error"
 
 
 launchInterpreter :: [String] -> [String] -> IO ()
 launchInterpreter paths files =
   case buildAstTree paths files of
-    Left err -> putStrLn err
-    Right expr -> launchPrompt expr
+    Left  err -> putStrLn err
+    Right ast -> launchPrompt ast
 
 
 launchCompiler :: [String] -> [String] -> IO ()
-launchCompiler paths files = print $ buildAstTree paths files
+launchCompiler paths files =
+  case buildAstTree paths files of
+    Left  err -> putStrLn err
+    Right ast -> print ast
