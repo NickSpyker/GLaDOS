@@ -17,7 +17,7 @@ data AstType
   deriving (Show, Eq)
 
 data AstBinding
-  = Bound    String AstType Ast
+  = Bound    String  AstType Ast
   | Enum     String [AstBinding]
   | Struct   String [AstBinding]
   | Function String [AstBinding] AstType Ast
@@ -33,13 +33,14 @@ data Control
   deriving (Show, Eq)
 
 data Ast
-  = Program  [Ast]
-  | Module   String [Ast]
+  = Empty
+  | Program  [Ast]
+  | Module    String [Ast]
   | Section  [Ast]
-  | Value    Literal
-  | Binding  AstBinding
-  | Operator Operator Ast Ast
-  | Control  Control
+  | Value     Literal
+  | Binding   AstBinding
+  | Operator  Operator Ast Ast
+  | Control   Control
   deriving (Show, Eq)
 
 
@@ -78,6 +79,10 @@ parseAST accu ess = tryToParse accu ess parsers
     parsers =
       [ parseLiteral
       , parseNumberOperation
+      , parseBooleanOperation
+      , parseCmpOperation
+      , parseInPrth
+      , parseBound
       ]
 
 
@@ -92,13 +97,13 @@ parseLiteral _ _ = Nothing
 
 parseNumberOperation :: AstParser
 parseNumberOperation [] _ = Nothing
-parseNumberOperation acc (T op : T y : T mop : next)
+parseNumberOperation acc (T op : y : T mop : next)
   | isPriorOp op && isPriorOp mop =
-      case parseNumberOperation acc [T op, T y] of
+      case parseNumberOperation acc [T op, y] of
         Just (new, []) -> parseNumberOperation new (T mop : next)
         _ -> Nothing
   | not (isPriorOp op) && isPriorOp mop =
-      case singleAst (T y) of
+      case singleAst (y) of
         Nothing -> Nothing
         Just yv ->
           case parseNumberOperation [yv] (T mop : next) of
@@ -112,14 +117,14 @@ parseNumberOperation acc (T op : T y : T mop : next)
                 _      -> Nothing
             _ -> Nothing
   | otherwise =
-      case parseNumberOperation acc [T op, T y] of
+      case parseNumberOperation acc [T op, y] of
         Just (new, []) -> Just (new, T mop : next)
         _ -> Nothing
   where
     isPriorOp :: Token -> Bool
     isPriorOp o = o `elem` [TokMul, TokDiv, TokMod]
-parseNumberOperation acc (T op : T y : next) =
-  case singleAst (T y) of
+parseNumberOperation acc (T op : y : next) =
+  case singleAst (y) of
     Nothing -> Nothing
     Just yv ->
       case op of
@@ -130,3 +135,58 @@ parseNumberOperation acc (T op : T y : next) =
         TokMod -> Just (init acc ++ [Operator Mod (last acc) yv], next)
         _      -> Nothing
 parseNumberOperation _ _ = Nothing
+
+
+parseBooleanOperation :: AstParser
+parseBooleanOperation acc (T op : y : next) =
+  case singleAst (y) of
+    Nothing -> Nothing
+    Just yv ->
+      case op of
+        TokAnd -> Just (init acc ++ [Operator And (last acc) yv], next)
+        TokNot -> Just (acc      ++ [Operator Not  yv     Empty], next)
+        TokOr  -> Just (init acc ++ [Operator Or  (last acc) yv], next)
+        _      -> Nothing
+parseBooleanOperation _ _ = Nothing
+
+
+parseCmpOperation :: AstParser
+parseCmpOperation acc (T op : y : next) =
+  case singleAst (y) of
+    Nothing -> Nothing
+    Just yv ->
+      case op of
+        TokEq    -> Just (init acc ++ [Operator Eq (last acc) yv], next)
+        TokNotEq -> Just (init acc ++ [Operator Not (Operator Eq (last acc) yv) Empty], next)
+        TokGt    -> Just (init acc ++ [Operator Gt (last acc) yv], next)
+        TokLt    -> Just (init acc ++ [Operator Lt (last acc) yv], next)
+        TokGtEq  -> Just (init acc ++ [Operator Or (Operator Gt (last acc) yv) (Operator Eq (last acc) yv)], next)
+        TokLtEq  -> Just (init acc ++ [Operator Or (Operator Lt (last acc) yv) (Operator Eq (last acc) yv)], next)
+        _        -> Nothing
+parseCmpOperation _ _ = Nothing
+
+
+parseInPrth :: AstParser
+parseInPrth acc (Prths block : next) =
+  case getAst block of
+    Left  _   -> Nothing
+    Right ast -> Just (acc ++ [Section ast], next)
+parseInPrth _ _ = Nothing
+
+
+parseBound :: AstParser
+parseBound acc (BSection maybeBinding : next) =
+  case parseBound' maybeBinding of
+    Nothing -> Nothing
+    Just bi -> Just (acc ++ [bi], next)
+  where
+    parseBound' :: [BExpr] -> Maybe Ast
+    parseBound' (T TokVar : T (TokIde name) : T TokCol : T mtype : T TokAsgn : value) =
+      case getAst value of
+        Right [vv] ->
+          case mtype of
+            TokTyString -> Just $ Binding $ Bound name TyString vv
+            _           -> Nothing
+        _ -> Nothing
+    parseBound' _ = Nothing
+parseBound _ _ = Nothing
