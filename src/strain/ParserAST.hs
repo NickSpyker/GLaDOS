@@ -34,7 +34,7 @@ data Control
 
 data Ast
   = Program  [Ast]
-  | Module   String Ast
+  | Module   String [Ast]
   | Section  [Ast]
   | Value    Literal
   | Binding  AstBinding
@@ -44,4 +44,13 @@ data Ast
 
 
 buildASTtree :: BExpr -> Either String Ast
-buildASTtree _ = Right $ Program []
+buildASTtree (BEModule name exprs) =
+  case parseAST [] exprs of
+    Left  err -> Left err
+    Right ast -> Right $ Module name ast
+buildASTtree expr = Left $ "<expect module but got> #" ++ show expr ++ "#"
+
+
+parseAST :: [Ast] -> [BExpr] -> Either String [Ast]
+parseAST acc [] = Right acc
+parseAST acc exprs = Left $ "<unmanaged situation>\n  #\n    acc = {\n      " ++ show acc ++ "\n    }\n    exprs = {\n      " ++ show exprs ++ "\n    }\n  #"

@@ -5,8 +5,7 @@ import Lexer (Token(..))
 
 
 data BExpr
-  = BEProgram  [BExpr]         -- all files, a list of BModules
-  | BEModule    String [BExpr] -- one file, filename and code
+  = BEModule    String [BExpr] -- one file, filename and code
   | BEInBraces [BExpr]         -- { this }
   | BEInPrths  [BExpr]         -- ( this )
   | BEInHooks  [BExpr]         -- [ this ]
