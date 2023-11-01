@@ -3,6 +3,7 @@
         "string": "string",
         "float":  "float",
         "bool":   "bool",
+        "void":   "void",
         "char":   "char",
         "int":    "int"
     },

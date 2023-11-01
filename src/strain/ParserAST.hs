@@ -10,6 +10,7 @@ data AstType
   = TyString
   | TyFloat
   | TyBool
+  | TyVoid
   | TyChar
   | TyInt
   | TyCustom String
@@ -18,6 +19,8 @@ data AstType
 
 data AstBinding
   = Bound    String  AstType Ast
+  | ReBound  String  Ast
+  | BConst   String  AstType Ast
   | Enum     String [AstBinding]
   | Struct   String [AstBinding]
   | Function String [AstBinding] AstType Ast
@@ -38,6 +41,7 @@ data Ast
   | Module    String [Ast]
   | Section  [Ast]
   | Value     Literal
+  | CallId    String
   | Binding   AstBinding
   | Operator  Operator Ast Ast
   | Control   Control
@@ -83,6 +87,8 @@ parseAST accu ess = tryToParse accu ess parsers
       , parseCmpOperation
       , parseInPrth
       , parseBound
+      , parseIncrAndBound
+      , parseFunction
       ]
 
 
@@ -186,7 +192,45 @@ parseBound acc (BSection maybeBinding : next) =
         Right [vv] ->
           case mtype of
             TokTyString -> Just $ Binding $ Bound name TyString vv
+            TokTyFloat  -> Just $ Binding $ Bound name TyFloat  vv
+            TokTyChar   -> Just $ Binding $ Bound name TyChar   vv
+            TokTyInt    -> Just $ Binding $ Bound name TyInt    vv
+            _           -> Nothing
+        _ -> Nothing
+    parseBound' (T TokConst : T (TokIde name) : T TokCol : T mtype : T TokAsgn : value) =
+      case getAst value of
+        Right [vv] ->
+          case mtype of
+            TokTyString -> Just $ Binding $ BConst name TyString vv
+            TokTyFloat  -> Just $ Binding $ BConst name TyFloat  vv
+            TokTyChar   -> Just $ Binding $ BConst name TyChar   vv
+            TokTyInt    -> Just $ Binding $ BConst name TyInt    vv
             _           -> Nothing
         _ -> Nothing
     parseBound' _ = Nothing
 parseBound _ _ = Nothing
+
+
+parseIncrAndBound :: AstParser
+parseIncrAndBound acc (BSection maybeIncrBinding : next) =
+  case parseIncrAndBound' maybeIncrBinding of
+    Nothing -> Nothing
+    Just bi -> Just (acc ++ [bi], next)
+  where
+    parseIncrAndBound' :: [BExpr] -> Maybe Ast
+    parseIncrAndBound' (T (TokIde name) : T op : value) =
+      case getAst value of
+        Right [vv] ->
+          case op of
+            TokAddAsgn -> Just $ Binding $ ReBound name $ Operator Add (CallId name) vv
+            TokMulAsgn -> Just $ Binding $ ReBound name $ Operator Mul (CallId name) vv
+            TokSubAsgn -> Just $ Binding $ ReBound name $ Operator Sub (CallId name) vv
+            TokDivAsgn -> Just $ Binding $ ReBound name $ Operator Div (CallId name) vv
+            _ -> Nothing
+        _ -> Nothing
+    parseIncrAndBound' _ = Nothing
+parseIncrAndBound _ _ = Nothing
+
+
+parseFunction :: AstParser
+parseFunction _ _ = Nothing

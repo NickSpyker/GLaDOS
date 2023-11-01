@@ -53,6 +53,8 @@ data Token
   | TokContinue    -- "continue"
   | TokTyString    -- "string"
   | TokTyFloat     -- "float"
+  | TokTyBool      -- "bool"
+  | TokTyVoid      -- "void"
   | TokTyChar      -- "char"
   | TokTyInt       -- "int"
   | TokDeclType    -- "type"
@@ -150,6 +152,8 @@ parseWordToken ('b' : 'r' : 'e' : 'a' : 'k' : next) = Just (TokBreak, next) -- <
 parseWordToken ('c' : 'o' : 'n' : 's' : 't' : next) = Just (TokConst, next) -- <const>
 parseWordToken ('t' : 'y' : 'p' : 'e' : next) = Just (TokDeclType, next) -- <type>
 parseWordToken ('c' : 'h' : 'a' : 'r' : next) = Just (TokTyChar, next) -- <char>
+parseWordToken ('b' : 'o' : 'o' : 'l' : next) = Just (TokTyBool, next) -- <bool>
+parseWordToken ('v' : 'o' : 'i' : 'd' : next) = Just (TokTyVoid, next) -- <void>
 parseWordToken ('e' : 'n' : 'u' : 'm' : next) = Just (TokEnum, next) -- <enum>
 parseWordToken ('l' : 'o' : 'o' : 'p' : next) = Just (TokLoop, next) -- <loop>
 parseWordToken ('e' : 'l' : 's' : 'e' : next) = Just (TokElse, next) -- <else>

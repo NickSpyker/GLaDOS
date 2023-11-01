@@ -3,6 +3,7 @@
         "string": "chaine",
         "float":  "flottant",
         "bool":   "booleen",
+        "void":   "vide",
         "char":   "caractere",
         "int":    "entier"
     },

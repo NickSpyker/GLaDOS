@@ -33,6 +33,7 @@ pub struct Type {
     pub string: String,
     pub float:  String,
     pub bool:   String,
+    pub void:   String,
     pub char:   String,
     pub int:    String
 }
