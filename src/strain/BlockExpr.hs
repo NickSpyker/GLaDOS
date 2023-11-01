@@ -21,9 +21,9 @@ tokensToBlock = tokensToBlock'
     tokensToBlock' :: String -> [Token] -> Either String BExpr
     tokensToBlock' mn tks =
       case parserBehavior [] mn tks of
-        Left err          -> Left err
+        Left  err         -> Left err
         Right (bexpr, []) -> Right bexpr
-        Right (_, mi)     -> Left $ "<Missing BEsection> #" ++ show mi ++ "#"
+        Right (_, mi)     -> Left $ "<Missing section> #" ++ show mi ++ "#"
 
 
 parserBehavior :: [BExpr] -> String -> [Token] -> Either String (BExpr, [Token])
@@ -55,11 +55,21 @@ parserBehavior acc mn (TokOpCrch : tokens) =
 parserBehavior acc _ (TokClCrch : tokens) = Right (BEInHooks acc, tokens)
 ------------------------
 -- Behavior of semicolon
-parserBehavior acc mn (TokSmCol : tokens) = parserBehavior (parseSmColInAcc (reverse acc) []) mn tokens
-  where
-    parseSmColInAcc :: [BExpr] -> [BExpr] -> [BExpr]
-    parseSmColInAcc []  []  = []
-    parseSmColInAcc []  new = [BESection new]
-    parseSmColInAcc (BEExpr tok : old) new = parseSmColInAcc old (BEExpr tok : new)
-    parseSmColInAcc (other    : old) new = reverse (other : old) ++ [BESection new]
+parserBehavior acc mn (TokSmCol : tokens) = parserBehavior (handleSection acc) mn tokens
+------------
+-- Otherwise
 parserBehavior acc mn (token : tokens) = parserBehavior (acc ++ [BEExpr token]) mn tokens
+
+
+handleSection :: [BExpr] -> [BExpr]
+handleSection acc = take (length acc - length (keep acc)) acc ++ [BESection (keep acc)]
+  where
+    keep :: [BExpr] -> [BExpr]
+    keep i = reverse $ fetchToKeep $ reverse i
+
+    fetchToKeep :: [BExpr] -> [BExpr]
+    fetchToKeep [] = []
+    fetchToKeep (BESection   _ : _) = []
+    fetchToKeep (BEInBraces  _ : _) = []
+    fetchToKeep (BEExpr TokVar : _) = [BEExpr TokVar]
+    fetchToKeep (expr : next)       = expr : fetchToKeep next

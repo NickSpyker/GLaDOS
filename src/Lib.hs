@@ -1,7 +1,8 @@
-module Lib (readToString, getFilesContent, haveElemOf, rmOcc, isNumber, isNumberOrDot, extractBtwQuot, trim) where
+module Lib (readToString, getFilesContent, haveElemOf, rmOcc, isNumber, isNumberOrDot, extractBtwQuot, trim, finishWith) where
 
 
 import Control.Exception (catch, IOException)
+import Data.List (isPrefixOf)
 import Data.Char (isDigit)
 
 
@@ -70,3 +71,10 @@ trim = trim' False
   trim' _ ('\r' : next) = trim next
   trim' False s = reverse $ trim' True $ reverse s
   trim' True  s = s
+
+
+finishWith :: String -> String -> Bool
+finishWith str pattern = finishWith' (reverse str) $ reverse pattern
+  where
+    finishWith' :: String -> String -> Bool
+    finishWith' rstr rpattern = rpattern `isPrefixOf` rstr

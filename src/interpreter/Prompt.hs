@@ -4,13 +4,13 @@ module Prompt (launchPrompt) where
 import System.Console.Haskeline (runInputT, defaultSettings, historyFile, autoAddHistory, InputT, getInputLine, outputStrLn, outputStr)
 import DebugOutput (printDebugTokens, printDebugBlockExpression, printDebugAst)
 import Strain (getTokens, getBlockExpr, getAst)
-import Data.List (isPrefixOf, isSubsequenceOf)
 import PromptUsage (printPromptHelp)
 import Data.Version (showVersion)
 import Paths_glados (version)
+import Data.List (isPrefixOf)
+import Lib (trim, finishWith)
 import System.Info (os)
 import ParserAST (Ast)
-import Lib (trim)
 
 
 launchPrompt :: Ast -> IO ()
@@ -68,7 +68,7 @@ clearScreen = outputStr "\ESC[H\ESC[2J"
 
 multiLinePrompt :: String -> InputT IO ()
 multiLinePrompt acc
-  | "!end" `isSubsequenceOf` acc = handleInput $ Just $ take (length acc - 4) acc
+  | acc `finishWith` "!end" = handleInput $ Just $ take (length acc - 4) acc
   | acc `elem` ["!tokens", "!blockexpr", "!ast"] = multiLinePrompt $ acc ++ " "
   | otherwise = getInputLine "" >>= multiLinePrompt'
   where

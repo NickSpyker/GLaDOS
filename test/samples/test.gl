@@ -1,16 +1,16 @@
+!ml!blockexpr
 
-fun main() -> int
+fun isEven(nbr: int) -> bool
 {
-    let x: int = 5;
-    let y: int = 4;
+    let nbr_cpy: int = nbr;
 
-    {
-        (
-            let x: int = 5;
-        )
+    if (nbr == 0) {
+        return true;
+    } else {
+        return not isEven(nbr_cpy - 1);
     }
 
-    let res: int = add(x, y);
-
-    return 0;
+    return false;
 }
+
+!end

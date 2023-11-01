@@ -69,20 +69,22 @@ type ParserLexer = String -> Maybe (Token, String)
 
 
 tokenize :: String -> Either String [Token]
-tokenize buffer = tokenize' [
-    parseBasicToken,
-    parseWordToken,
-    parseLitToken,
-    parseIdeToken
-  ]
-  [] $ trim buffer
+tokenize buffer = tokenize' parsers [] $ trim buffer
   where
     tokenize' :: [ParserLexer] -> [Token] -> String -> Either String [Token]
     tokenize' _ acc [] = Right acc
-    tokenize' parsers acc input =
-      case parseAllToken parsers input of
-        Just (t, n) -> tokenize' parsers (acc ++ [t]) n
+    tokenize' prs acc input =
+      case parseAllToken prs input of
+        Just (t, n) -> tokenize' prs (acc ++ [t]) n
         Nothing     -> Left $ "<Invalid token> #" ++ input ++ "#"
+    
+    parsers :: [ParserLexer]
+    parsers =
+      [ parseBasicToken
+      , parseWordToken
+      , parseLitToken
+      , parseIdeToken
+      ]
 
 
 parseAllToken :: [ParserLexer] -> String -> Maybe (Token, String)
@@ -178,15 +180,15 @@ parseLitToken = parseLitToken' []
     parseLitToken' [] ('\'' :        c : '\'' : next) = Just (TokLit (LitChar  c), next)
     parseLitToken' [] ('"' : next) =
       case extractBtwQuot ('"' : next) of
-        Just str -> Just (TokLit (LitString str), drop (length str + 2) next)
+        Just str -> Just (TokLit (LitString str), drop (length str + 1) next)
         Nothing  -> Nothing
     parseLitToken' [] (c : next)
       | isNumberOrDot [c] = parseLitToken' [c] next
       | otherwise         = Nothing
     parseLitToken' acc (c : next)
       | isNumberOrDot [c] && isNumberOrDot acc = parseLitToken' (c : acc) next
-      | isNumber acc      = Just (TokLit (LitInt   (read acc)), next)
-      | isNumberOrDot acc = Just (TokLit (LitFloat (read acc)), next)
+      | isNumber acc      = Just (TokLit (LitInt   (read acc)), c : next)
+      | isNumberOrDot acc = Just (TokLit (LitFloat (read acc)), c : next)
       | otherwise         = Nothing
 
 
