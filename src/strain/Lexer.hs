@@ -191,7 +191,7 @@ parseLitToken = parseLitToken' []
       | isNumberOrDot [c] = parseLitToken' [c] next
       | otherwise         = Nothing
     parseLitToken' acc (c : next)
-      | isNumberOrDot [c] && isNumberOrDot acc = parseLitToken' (c : acc) next
+      | isNumberOrDot [c] && isNumberOrDot acc = parseLitToken' (acc ++ [c]) next
       | isNumber acc      = Just (TokLit (LitInt   (read acc)), c : next)
       | isNumberOrDot acc = Just (TokLit (LitFloat (read acc)), c : next)
       | otherwise         = Nothing

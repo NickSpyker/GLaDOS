@@ -1,5 +1,3 @@
-!ml
-
 fun isEven(nbr: int) -> bool
 {
     if (nbr == 0) {
@@ -13,5 +11,3 @@ fun main(argv: string[]) -> int
 {
     return 0;
 }
-
-!end
