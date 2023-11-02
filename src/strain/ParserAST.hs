@@ -22,6 +22,7 @@ data AstBinding
   | ReBound  String  Ast
   | Arg      String  AstType
   | BConst   String  AstType Ast
+  | Type     String  AstType
   | Enum     String [AstBinding]
   | Struct   String [AstBinding]
   | Function String [AstBinding] AstType [Ast]
@@ -87,9 +88,13 @@ parseAST accu ess = tryToParse accu ess parsers
       , parseBooleanOperation
       , parseCmpOperation
       , parseInPrth
+      , parseArray
       , parseBound
       , parseIncrAndBound
       , parseFunction
+      , parseStruct
+      , parseEnum
+      , parseTypeDecl
       ]
 
 
@@ -110,7 +115,7 @@ parseNumberOperation acc (T op : y : T mop : next)
         Just (new, []) -> parseNumberOperation new (T mop : next)
         _ -> Nothing
   | not (isPriorOp op) && isPriorOp mop =
-      case singleAst (y) of
+      case singleAst y of
         Nothing -> Nothing
         Just yv ->
           case parseNumberOperation [yv] (T mop : next) of
@@ -131,7 +136,7 @@ parseNumberOperation acc (T op : y : T mop : next)
     isPriorOp :: Token -> Bool
     isPriorOp o = o `elem` [TokMul, TokDiv, TokMod]
 parseNumberOperation acc (T op : y : next) =
-  case singleAst (y) of
+  case singleAst y of
     Nothing -> Nothing
     Just yv ->
       case op of
@@ -146,7 +151,7 @@ parseNumberOperation _ _ = Nothing
 
 parseBooleanOperation :: AstParser
 parseBooleanOperation acc (T op : y : next) =
-  case singleAst (y) of
+  case singleAst y of
     Nothing -> Nothing
     Just yv ->
       case op of
@@ -159,7 +164,7 @@ parseBooleanOperation _ _ = Nothing
 
 parseCmpOperation :: AstParser
 parseCmpOperation acc (T op : y : next) =
-  case singleAst (y) of
+  case singleAst y of
     Nothing -> Nothing
     Just yv ->
       case op of
@@ -181,6 +186,20 @@ parseInPrth acc (Prths block : next) =
 parseInPrth _ _ = Nothing
 
 
+parseArray :: AstParser
+parseArray acc (Hooks elems : next) =
+  case parseArray' [] elems of
+    Just arr -> Just (acc ++ [Value $ LitArray arr], next)
+    Nothing  -> Nothing
+  where
+    parseArray' :: [Literal] -> [BExpr] -> Maybe [Literal]
+    parseArray' a [] = Just a
+    parseArray' a [T (TokLit lit)] = parseArray' (a ++ [lit]) []
+    parseArray' a (T (TokLit lit) : T TokCom : n)  = parseArray' (a ++ [lit]) n
+    parseArray' _ _ = Nothing
+parseArray _ _ = Nothing
+
+
 parseBound :: AstParser
 parseBound acc (BSection maybeBinding : next) =
   case parseBound' maybeBinding of
@@ -200,6 +219,18 @@ parseBound acc (BSection maybeBinding : next) =
             TokTyVoid   -> Just $ Binding $ Bound name TyVoid   vv
             _           -> Nothing
         _ -> Nothing
+    parseBound' (T TokVar : T (TokIde name) : T TokCol : T mtype : Hooks [] : T TokAsgn : value) =
+      case getAst value of
+        Right [vv] ->
+          case mtype of
+            TokTyString -> Just $ Binding $ Bound name (TyArray TyString) vv
+            TokTyFloat  -> Just $ Binding $ Bound name (TyArray TyFloat)  vv
+            TokTyChar   -> Just $ Binding $ Bound name (TyArray TyChar)   vv
+            TokTyInt    -> Just $ Binding $ Bound name (TyArray TyInt)    vv
+            TokTyBool   -> Just $ Binding $ Bound name (TyArray TyBool)   vv
+            TokTyVoid   -> Just $ Binding $ Bound name (TyArray TyVoid)   vv
+            _           -> Nothing
+        _ -> Nothing
     parseBound' (T TokConst : T (TokIde name) : T TokCol : T mtype : T TokAsgn : value) =
       case getAst value of
         Right [vv] ->
@@ -208,8 +239,20 @@ parseBound acc (BSection maybeBinding : next) =
             TokTyFloat  -> Just $ Binding $ BConst name TyFloat  vv
             TokTyChar   -> Just $ Binding $ BConst name TyChar   vv
             TokTyInt    -> Just $ Binding $ BConst name TyInt    vv
-            TokTyBool   -> Just $ Binding $ Bound name TyBool   vv
-            TokTyVoid   -> Just $ Binding $ Bound name TyVoid   vv
+            TokTyBool   -> Just $ Binding $ BConst name TyBool   vv
+            TokTyVoid   -> Just $ Binding $ BConst name TyVoid   vv
+            _           -> Nothing
+        _ -> Nothing
+    parseBound' (T TokConst : T (TokIde name) : T TokCol : T mtype : Hooks [] : T TokAsgn : value) =
+      case getAst value of
+        Right [vv] ->
+          case mtype of
+            TokTyString -> Just $ Binding $ BConst name (TyArray TyString) vv
+            TokTyFloat  -> Just $ Binding $ BConst name (TyArray TyFloat)  vv
+            TokTyChar   -> Just $ Binding $ BConst name (TyArray TyChar)   vv
+            TokTyInt    -> Just $ Binding $ BConst name (TyArray TyInt)    vv
+            TokTyBool   -> Just $ Binding $ BConst name (TyArray TyBool)   vv
+            TokTyVoid   -> Just $ Binding $ BConst name (TyArray TyVoid)   vv
             _           -> Nothing
         _ -> Nothing
     parseBound' _ = Nothing
@@ -276,3 +319,79 @@ parseFunction acc (T TokFun : T (TokIde funName) : Prths args : T TokRetTy : T t
         _           -> Nothing
     parseArgs _ _ = Nothing
 parseFunction _ _ = Nothing
+
+
+parseStruct :: AstParser
+parseStruct acc (T TokStruct : T (TokIde structName) : Braces e : next) =
+  case parseStruct' [] e of
+    Nothing -> Nothing
+    Just ss -> Just (acc ++ [Binding $ Struct structName ss], next)
+  where
+    parseStruct' :: [AstBinding] -> [BExpr] -> Maybe [AstBinding]
+    parseStruct' a [] = Just a
+    parseStruct' a [T (TokIde varName), T TokCol, T tokType] =
+      case tokType of
+        TokTyString -> parseStruct' (a ++ [Arg varName TyString]) []
+        TokTyFloat  -> parseStruct' (a ++ [Arg varName  TyFloat]) []
+        TokTyChar   -> parseStruct' (a ++ [Arg varName   TyChar]) []
+        TokTyInt    -> parseStruct' (a ++ [Arg varName    TyInt]) []
+        TokTyBool   -> parseStruct' (a ++ [Arg varName   TyBool]) []
+        TokTyVoid   -> parseStruct' (a ++ [Arg varName   TyVoid]) []
+        _           -> Nothing
+    parseStruct' a (T (TokIde varName) : T TokCol : T tokType : T TokCom : n) =
+      case tokType of
+        TokTyString -> parseStruct' (a ++ [Arg varName TyString]) n
+        TokTyFloat  -> parseStruct' (a ++ [Arg varName  TyFloat]) n
+        TokTyChar   -> parseStruct' (a ++ [Arg varName   TyChar]) n
+        TokTyInt    -> parseStruct' (a ++ [Arg varName    TyInt]) n
+        TokTyBool   -> parseStruct' (a ++ [Arg varName   TyBool]) n
+        TokTyVoid   -> parseStruct' (a ++ [Arg varName   TyVoid]) n
+        _           -> Nothing
+    parseStruct' _ _ = Nothing
+parseStruct _ _ = Nothing
+
+
+parseEnum :: AstParser
+parseEnum acc (T TokEnum : T (TokIde enumName) : Braces e : next) =
+  case parseEnum' [] 0 e of
+    Nothing -> Nothing
+    Just ss -> Just (acc ++ [Binding $ Enum enumName ss], next)
+  where
+    parseEnum' :: [AstBinding] -> Int -> [BExpr] -> Maybe [AstBinding]
+    parseEnum' a _ [] = Just a
+    parseEnum' a i (T (TokIde argName) : T TokCom : n) =
+      parseEnum' (a ++ [Bound argName TyInt (Value (LitInt i))]) (i + 1) n
+    parseEnum' a i [T (TokIde argName)] =
+      parseEnum' (a ++ [Bound argName TyInt (Value (LitInt i))]) (i + 1) []
+    parseEnum' _ _ _ = Nothing
+parseEnum _ _ = Nothing
+
+
+parseTypeDecl :: AstParser
+parseTypeDecl acc (BSection decltype : next) = 
+  case parseTypeDecl' decltype of
+    Nothing -> Nothing
+    Just dt -> Just (acc ++ [dt], next)
+  where
+    parseTypeDecl' :: [BExpr] -> Maybe Ast
+    parseTypeDecl' [T TokDeclType, T (TokIde typeName), T TokAsgn, T typeType, Hooks []] =
+      case typeType of
+        TokTyString -> Just $ Binding $ Type typeName (TyArray TyString)
+        TokTyFloat  -> Just $ Binding $ Type typeName (TyArray  TyFloat)
+        TokTyChar   -> Just $ Binding $ Type typeName (TyArray   TyChar)
+        TokTyInt    -> Just $ Binding $ Type typeName (TyArray    TyInt)
+        TokTyBool   -> Just $ Binding $ Type typeName (TyArray   TyBool)
+        TokTyVoid   -> Just $ Binding $ Type typeName (TyArray   TyVoid)
+        _           -> Nothing
+    parseTypeDecl' [T TokDeclType, T (TokIde typeName), T TokAsgn, T typeType] =
+      case typeType of
+        TokTyString -> Just $ Binding $ Type typeName TyString
+        TokTyFloat  -> Just $ Binding $ Type typeName TyFloat
+        TokTyChar   -> Just $ Binding $ Type typeName TyChar
+        TokTyInt    -> Just $ Binding $ Type typeName TyInt
+        TokTyBool   -> Just $ Binding $ Type typeName TyBool
+        TokTyVoid   -> Just $ Binding $ Type typeName TyVoid
+        _           -> Nothing
+    parseTypeDecl' _ = Nothing
+parseTypeDecl _ _ = Nothing
+ 
