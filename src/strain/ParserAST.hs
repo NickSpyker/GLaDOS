@@ -31,8 +31,8 @@ data AstBinding
 data Operator = Add | Sub | Mul | Div | Mod | Not | And | Or | Gt | Lt | Eq deriving (Show, Eq)
 
 data Control
-  = If     Ast Ast Ast
-  | While  Ast Ast
+  = If     Ast [Ast] [Ast]
+  | While  Ast  Ast
   | Return Ast
   | For    AstBinding Ast Ast Ast
   deriving (Show, Eq)
@@ -44,6 +44,7 @@ data Ast
   | Section  [Ast]
   | Value     Literal
   | CallId    String
+  | CallFun   String [Ast]
   | Binding   AstBinding
   | Operator  Operator Ast Ast
   | Control   Control
@@ -90,11 +91,15 @@ parseAST accu ess = tryToParse accu ess parsers
       , parseInPrth
       , parseArray
       , parseBound
+      , parseFunctionCall
       , parseIncrAndBound
       , parseFunction
       , parseStruct
       , parseEnum
       , parseTypeDecl
+      , parseIf
+      , parseSection
+      , parseReturn
       ]
 
 
@@ -105,6 +110,14 @@ parseLiteral :: AstParser
 parseLiteral _   (T (TokLit   _) : T (TokLit _) : _) = Nothing
 parseLiteral acc (T (TokLit lit) : next) = Just (acc ++ [Value lit], next)
 parseLiteral _ _ = Nothing
+
+
+parseSection :: AstParser
+parseSection acc (BSection section : next) =
+  case getAst section of
+    Left  _ -> Nothing
+    Right s -> Just (acc ++ [Section s], next)
+parseSection _ _ = Nothing
 
 
 parseNumberOperation :: AstParser
@@ -395,3 +408,59 @@ parseTypeDecl acc (BSection decltype : next) =
     parseTypeDecl' _ = Nothing
 parseTypeDecl _ _ = Nothing
  
+
+parseIf :: AstParser
+parseIf acc (T TokIf : Prths cond : Braces ifBody : T TokElse : Braces elseBody : next) =
+  case getAst cond of
+    Right [c] ->
+      case getAst ifBody of
+        Left  _ -> Nothing
+        Right i ->
+          case getAst elseBody of
+            Left  _ -> Nothing
+            Right e -> Just (acc ++ [Control $ If c i e], next)
+    _ -> Nothing
+parseIf acc (T TokIf : Prths cond : Braces ifBody : next) =
+  case getAst cond of
+    Right [c] ->
+      case getAst ifBody of
+        Left  _ -> Nothing
+        Right i -> Just (acc ++ [Control $ If c i [Empty]], next)
+    _ -> Nothing
+parseIf _ _ = Nothing
+
+
+parseReturn :: AstParser
+parseReturn acc (BSection ret : next) =
+  case parseReturn' ret of
+    Nothing -> Nothing
+    Just re -> Just (acc ++ [re], next)
+  where
+    parseReturn' :: [BExpr] -> Maybe Ast
+    parseReturn' (T TokReturn : retValue) =
+      case getAst retValue of
+        Right [r] -> Just $ Control $ Return r
+        _         -> Nothing
+    parseReturn' _ = Nothing
+parseReturn _ _ = Nothing
+
+
+parseFunctionCall :: AstParser
+parseFunctionCall acc (T (TokIde funName) : Prths args : next) =
+  case parseArgs [] args of
+    Nothing -> Nothing
+    Just ag -> Just (acc ++ [CallFun funName ag], next)
+  where
+    parseArgs :: [Ast] -> [BExpr] -> Maybe [Ast]
+    parseArgs [] [] = Just []
+    parseArgs a  [] = Just a
+    parseArgs a [value] =
+      case singleAst value of
+        Just e -> parseArgs (a ++ [e]) []
+        _            -> Nothing
+    parseArgs a (value : T TokCom : n) =
+      case singleAst value of
+        Just e -> parseArgs (a ++ [e]) n
+        _            -> Nothing
+    parseArgs _ _ = Nothing
+parseFunctionCall _ _ = Nothing
