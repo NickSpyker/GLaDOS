@@ -100,6 +100,7 @@ parseAST accu ess = tryToParse accu ess parsers
       , parseIf
       , parseSection
       , parseReturn
+      , parseExprCall
       ]
 
 
@@ -312,6 +313,24 @@ parseFunction acc (T TokFun : T (TokIde funName) : Prths args : T TokRetTy : T t
   where
     parseArgs :: [AstBinding] -> [BExpr] -> Maybe [AstBinding]
     parseArgs [] [] = Just []
+    parseArgs a [T (TokIde argName), T TokCol, T tokT, Hooks []] =
+      case tokT of
+        TokTyString -> Just (a ++ [Arg argName (TyArray TyString)])
+        TokTyFloat  -> Just (a ++ [Arg argName (TyArray  TyFloat)])
+        TokTyChar   -> Just (a ++ [Arg argName (TyArray   TyChar)])
+        TokTyInt    -> Just (a ++ [Arg argName (TyArray    TyInt)])
+        TokTyBool   -> Just (a ++ [Arg argName (TyArray   TyBool)])
+        TokTyVoid   -> Just (a ++ [Arg argName (TyArray   TyVoid)])
+        _           -> Nothing
+    parseArgs a (T (TokIde argName) : T TokCol : T tokT : T TokCom : Hooks [] : n) =
+      case tokT of
+        TokTyString -> parseArgs (a ++ [Arg argName (TyArray TyString)]) n
+        TokTyFloat  -> parseArgs (a ++ [Arg argName (TyArray  TyFloat)]) n
+        TokTyChar   -> parseArgs (a ++ [Arg argName (TyArray   TyChar)]) n
+        TokTyInt    -> parseArgs (a ++ [Arg argName (TyArray    TyInt)]) n
+        TokTyBool   -> parseArgs (a ++ [Arg argName (TyArray   TyBool)]) n
+        TokTyVoid   -> parseArgs (a ++ [Arg argName (TyArray   TyVoid)]) n
+        _           -> Nothing
     parseArgs a [T (TokIde argName), T TokCol, T tokT] =
       case tokT of
         TokTyString -> Just (a ++ [Arg argName TyString])
@@ -445,22 +464,27 @@ parseReturn acc (BSection ret : next) =
 parseReturn _ _ = Nothing
 
 
+parseExprCall :: AstParser
+parseExprCall acc (T (TokIde callName) : next) =
+  Just (acc ++ [CallId callName], next)
+parseExprCall _ _ = Nothing
+
+
 parseFunctionCall :: AstParser
 parseFunctionCall acc (T (TokIde funName) : Prths args : next) =
-  case parseArgs [] args of
+  case getAstForEach [] (splitOnComa [] [] args) of
     Nothing -> Nothing
-    Just ag -> Just (acc ++ [CallFun funName ag], next)
+    Just as -> Just (acc ++ [CallFun funName as], next)
   where
-    parseArgs :: [Ast] -> [BExpr] -> Maybe [Ast]
-    parseArgs [] [] = Just []
-    parseArgs a  [] = Just a
-    parseArgs a [value] =
-      case singleAst value of
-        Just e -> parseArgs (a ++ [e]) []
-        _            -> Nothing
-    parseArgs a (value : T TokCom : n) =
-      case singleAst value of
-        Just e -> parseArgs (a ++ [e]) n
-        _            -> Nothing
-    parseArgs _ _ = Nothing
+    splitOnComa :: [[BExpr]] -> [BExpr] -> [BExpr] -> [[BExpr]]
+    splitOnComa ll a []             = ll ++ [a]
+    splitOnComa ll a (T TokCom : n) = splitOnComa (ll ++ [a])     [] n
+    splitOnComa ll a (value    : n) = splitOnComa  ll (a ++ [value]) n
+
+    getAstForEach :: [Ast] -> [[BExpr]] -> Maybe [Ast]
+    getAstForEach rgs [] = Just rgs
+    getAstForEach rgs (expr : ne) =
+      case getAst expr of
+        Left  _  -> Nothing
+        Right as -> getAstForEach (rgs ++ as) ne
 parseFunctionCall _ _ = Nothing
