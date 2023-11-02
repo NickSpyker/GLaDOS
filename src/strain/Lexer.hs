@@ -141,6 +141,7 @@ parseBasicToken _ = Nothing
 
 
 parseWordToken :: String -> Maybe (Token, String)
+parseWordToken ('c' : 'o' : 'n' : 't' : 'i' : 'n' : 'u' : 'e' : next) = Just (TokContinue, next) -- <continue>
 parseWordToken ('f' : 'a' : 'l' : 's' : 'e' : next) = Just (TokLit (LitBool False), next) -- <false>
 parseWordToken ('s' : 't' : 'r' : 'i' : 'n' : 'g' : next) = Just (TokTyString, next) -- <string>
 parseWordToken ('s' : 't' : 'r' : 'u' : 'c' : 't' : next) = Just (TokStruct, next) -- <struct>
