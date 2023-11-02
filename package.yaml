@@ -1,5 +1,5 @@
 name: glados
-version: 0.1.18
+version: 0.1.19
 
 dependencies:
   - base >= 4.7 && < 5
