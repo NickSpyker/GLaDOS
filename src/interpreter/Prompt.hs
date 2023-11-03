@@ -4,11 +4,11 @@ module Prompt (launchPrompt) where
 import System.Console.Haskeline (runInputT, defaultSettings, historyFile, autoAddHistory, InputT, getInputLine, outputStrLn, outputStr)
 import DebugOutput (printDebugTokens, printDebugBlockExpression, printDebugAst, printDebugByteCodes)
 import Strain (getTokens, getBlockExpr, getAst, getByteCodes)
+import Lib (trim, finishWith, nbrToFormatString)
 import PromptUsage (printPromptHelp)
 import Data.Version (showVersion)
 import Paths_glados (version)
 import Data.List (isPrefixOf)
-import Lib (trim, finishWith)
 import Instruction (Prog)
 import System.Info (os)
 
@@ -16,7 +16,7 @@ import System.Info (os)
 launchPrompt :: Prog -> IO ()
 launchPrompt p = printHeader >> runInputT
   defaultSettings { historyFile = Just ".glados_history", autoAddHistory = True }
-  (promptLoop p)
+  (promptLoop 0 p)
 
 
 printHeader :: IO ()
@@ -28,40 +28,40 @@ printHeader = putStrLn $
     ++ "\n\nType !help for usage, quit with !exit\n"
 
 
-promptLoop :: Prog -> InputT IO ()
-promptLoop p = getInputLine "GLaDOS> " >>= handleInput
+promptLoop :: Int -> Prog -> InputT IO ()
+promptLoop i p = getInputLine ("GLaDOS/" ++ nbrToFormatString i ++ "> ") >>= handleInput
   where
     handleInput :: Maybe String -> InputT IO ()
     handleInput  Nothing     = outputStrLn "\nLeaving GLaDOS"
     handleInput (Just input) = handleInput' $ trim input
 
     handleInput' :: String -> InputT IO ()
-    handleInput' ""       = promptLoop p
-    handleInput' "!help"  = printPromptHelp >> promptLoop p
+    handleInput' ""       = promptLoop (i + 1) p
+    handleInput' "!help"  = printPromptHelp >> promptLoop (i + 1) p
     handleInput' "!exit"  = outputStrLn "\nLeaving GLaDOS"
-    handleInput' "!clear" = clearScreen >> promptLoop p
+    handleInput' "!clear" = clearScreen >> promptLoop (i + 1) p
     handleInput' text
       | "!ml" `isPrefixOf` text = multiLinePrompt $ drop 3 text
       | "!tokens "    `isPrefixOf` text =
           case getTokens (drop 8 text) of
-            Left  err    -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop p
-            Right tokens -> printDebugTokens tokens >> promptLoop p
+            Left  err    -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop (i + 1) p
+            Right tokens -> printDebugTokens tokens >> promptLoop (i + 1) p
       | "!blockexpr " `isPrefixOf` text =
-          case getBlockExpr "Interpreter" (drop 11 text) of
-            Left  err   -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop p
-            Right block -> printDebugBlockExpression block >> promptLoop p
+          case getBlockExpr ("InterpreterLine" ++ show i) (drop 11 text) of
+            Left  err   -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop (i + 1) p
+            Right block -> printDebugBlockExpression block >> promptLoop (i + 1) p
       | "!ast "       `isPrefixOf` text =
-          case getAst "Interpreter" (drop 5 text) of
-            Left  err -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop p
-            Right ast -> printDebugAst ast >> promptLoop p
+          case getAst ("InterpreterLine" ++ show i) (drop 5 text) of
+            Left  err -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop (i + 1) p
+            Right ast -> printDebugAst ast >> promptLoop (i + 1) p
       | "!bytecode "  `isPrefixOf` text =
-          case getByteCodes p ["Interpreter"] [drop 10 text] of
-            Left  err -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop p
-            Right byt -> printDebugByteCodes byt >> promptLoop p
+          case getByteCodes p ["InterpreterLine" ++ show i] [drop 10 text] of
+            Left  err -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop i p
+            Right byt -> printDebugByteCodes byt >> promptLoop (i + 1) p
       | otherwise =
-          case getByteCodes p ["Interpreter"] [text] of
-            Left  err -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop p
-            Right byt -> printDebugByteCodes byt >> promptLoop byt
+          case getByteCodes p ["InterpreterLine" ++ show i] [text] of
+            Left  err -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop (i + 1) p
+            Right byt -> printDebugByteCodes byt >> promptLoop (i + 1) byt
     
     multiLinePrompt :: String -> InputT IO ()
     multiLinePrompt acc

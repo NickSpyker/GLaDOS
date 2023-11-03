@@ -35,6 +35,6 @@ printDebugAst ast = outputStrLn $ "\nAST tree:\n  " ++ show ast ++ "\n"
 
 printDebugByteCodes :: Prog -> InputT IO ()
 printDebugByteCodes [] = return ()
-printDebugByteCodes ((mn, insts) : ps) =
+printDebugByteCodes [(mn, insts)] =
   outputStrLn ("\nByteCodes (Module \"" ++ mn ++ "\"):\n  " ++ show insts ++ "\n")
-    >> printDebugByteCodes ps
+printDebugByteCodes (_ : ps) = printDebugByteCodes ps
