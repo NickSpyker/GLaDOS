@@ -1,4 +1,4 @@
-module ParserAST (buildASTtree, Ast(..)) where
+module ParserAST (buildASTtree, Ast(..), Control(..), Operator(..)) where
 
 
 import BlockExpr (BExpr(..))
@@ -191,7 +191,7 @@ parseCmpOperation acc (T op : y : next) =
         _        -> Nothing
 parseCmpOperation _ _ = Nothing
 
-
+-- gpt
 parseInPrth :: AstParser
 parseInPrth acc (Prths block : next) =
   case getAst block of

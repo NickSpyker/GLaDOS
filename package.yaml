@@ -38,7 +38,9 @@ executables:
 tests:
   glados-test:
     main: UnitTests.hs
-    source-dirs: test/unit_tests
+    source-dirs: 
+      - test/unit_tests
+      - test/unit_tests/strain_tests
     ghc-options:
       - -threaded
       - -rtsopts
