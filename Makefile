@@ -43,7 +43,7 @@ clean:
 
 fclean: clean
 	@$(RM) -r $(COVERAGE_PATH) ./.stack-work ./out
-	@$(RM) $(NAME) $(TEST_NAME) ./stack.yaml.lock ./glados.cabal
+	@$(RM) $(NAME) $(TEST_NAME) $(TEST_NAME).tix ./stack.yaml.lock ./glados.cabal
 	@$(RM) $(NAME)-v$(VERSION)
 	@make fclean -C ./bonus
 

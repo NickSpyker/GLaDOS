@@ -20,8 +20,8 @@ jobs:
       - name: Build
         run: make
       
-      #- name: Run tests
-        #run: make tests_run
+      - name: Run tests
+        run: make tests_run
 
       - name: Update and retrieve package version
         id: tag
