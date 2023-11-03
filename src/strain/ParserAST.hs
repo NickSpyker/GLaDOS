@@ -1,4 +1,4 @@
-module ParserAST (buildASTtree, Ast(..), Control(..), Operator(..)) where
+module ParserAST (buildASTtree, Ast(..), Control(..), Operator(..), AstType(..), AstBinding(..)) where
 
 
 import BlockExpr (BExpr(..))

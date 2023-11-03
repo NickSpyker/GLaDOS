@@ -5,6 +5,7 @@ module Instruction
   , Stack
   , Insts
   , Env
+  , Prog
   ) where
 
 
@@ -44,10 +45,8 @@ data Instruction
   deriving (Show, Eq)
 
 
-type Args  = Stack
-
-type Stack = [Data]
-
-type Insts = [Instruction]
-
-type Env   = [(String, Insts)]
+type Args    = Stack
+type Stack   = [Data]
+type Insts   = [Instruction]
+type Env     = [(String, Insts)]
+type Prog    = Env

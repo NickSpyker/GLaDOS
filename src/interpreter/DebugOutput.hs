@@ -1,9 +1,10 @@
-module DebugOutput (printDebugTokens, printDebugBlockExpression, printDebugAst) where
+module DebugOutput (printDebugTokens, printDebugBlockExpression, printDebugAst, printDebugByteCodes) where
 
 
 import System.Console.Haskeline (outputStr, outputStrLn, InputT)
 import BlockExpr (BExpr(..))
 import ParserAST (Ast(..))
+import Instruction (Prog)
 import Lexer (Token(..))
 
 
@@ -30,3 +31,10 @@ printDebugBlockExpression' (br : next) = printDebugBlockExpression' [br] >> outp
 
 printDebugAst :: Ast -> InputT IO ()
 printDebugAst ast = outputStrLn $ "\nAST tree:\n  " ++ show ast ++ "\n"
+
+
+printDebugByteCodes :: Prog -> InputT IO ()
+printDebugByteCodes [] = return ()
+printDebugByteCodes ((mn, insts) : ps) =
+  outputStrLn ("\nByteCodes (Module \"" ++ mn ++ "\"):\n  " ++ show insts ++ "\n")
+    >> printDebugByteCodes ps

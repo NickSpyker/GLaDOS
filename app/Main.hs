@@ -1,12 +1,11 @@
-module Main (main, handleArgs, launchInterpreter, launchCompiler) where
+module Main (main) where
 
 
 import Lib (getFilesContent, haveElemOf, rmOcc)
 import System.Environment (getArgs)
+import Strain (getByteCodes)
 import Prompt (launchPrompt)
-import ParserAST (Ast(..))
 import Usage (printHelp)
-import Strain (getAst)
 
 
 main :: IO ()
@@ -24,27 +23,15 @@ handleArgs input
       getFilesContent input >>= either putStrLn (launchCompiler input)
 
 
-buildAstTree :: [String] -> [String] -> Either String Ast
-buildAstTree = buildAstTree' []
-  where
-    buildAstTree' :: [Ast] -> [String] -> [String] -> Either String Ast
-    buildAstTree' acc _ [] = Right $ Program acc
-    buildAstTree' acc (path : paths) (file : files) =
-      case getAst path file of
-        Left  err -> Left err
-        Right ast -> buildAstTree' (acc ++ [ast]) paths files
-    buildAstTree' _ _ _ = Left "unhandled error"
-
-
 launchInterpreter :: [String] -> [String] -> IO ()
 launchInterpreter paths files =
-  case buildAstTree paths files of
+  case getByteCodes [] paths files of
     Left  err -> putStrLn err
-    Right ast -> launchPrompt ast
+    Right byc -> launchPrompt byc
 
 
 launchCompiler :: [String] -> [String] -> IO ()
 launchCompiler paths files =
-  case buildAstTree paths files of
+  case getByteCodes [] paths files of
     Left  err -> putStrLn err
-    Right ast -> print ast
+    Right byc -> print byc
