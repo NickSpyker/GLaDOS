@@ -3,10 +3,12 @@ module Prompt (launchPrompt) where
 
 import System.Console.Haskeline (runInputT, defaultSettings, historyFile, autoAddHistory, InputT, getInputLine, outputStrLn, outputStr)
 import DebugOutput (printDebugTokens, printDebugBlockExpression, printDebugAst, printDebugByteCodes)
-import Strain (getTokens, getBlockExpr, getAst, getByteCodes)
+import Strain (getTokens, getBlockExpr, getAst, getByteCodes, execute)
 import Lib (trim, finishWith, nbrToFormatString)
+import Control.Monad.IO.Class (liftIO)
 import PromptUsage (printPromptHelp)
 import Data.Version (showVersion)
+import PreExecution (optimize)
 import Paths_glados (version)
 import Data.List (isPrefixOf)
 import Instruction (Prog)
@@ -21,7 +23,7 @@ launchPrompt p = printHeader >> runInputT
 
 printHeader :: IO ()
 printHeader = putStrLn $
-  "GLaDOS Interpreter\nVersion "
+  "GλaDOS Interpreter\nVersion "
     ++ showVersion version
     ++ " on "
     ++ os
@@ -29,7 +31,7 @@ printHeader = putStrLn $
 
 
 promptLoop :: Int -> Prog -> InputT IO ()
-promptLoop i p = getInputLine ("GLaDOS/" ++ nbrToFormatString i ++ "> ") >>= handleInput
+promptLoop i p = getInputLine ("GλaDOS/" ++ nbrToFormatString i ++ "> ") >>= handleInput
   where
     handleInput :: Maybe String -> InputT IO ()
     handleInput  Nothing     = outputStrLn "\nLeaving GLaDOS"
@@ -57,12 +59,12 @@ promptLoop i p = getInputLine ("GLaDOS/" ++ nbrToFormatString i ++ "> ") >>= han
       | "!bytecode "  `isPrefixOf` text =
           case getByteCodes p ["InterpreterLine" ++ show i] [drop 10 text] of
             Left  err -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop i p
-            Right byt -> printDebugByteCodes byt >> promptLoop (i + 1) p
+            Right byt -> printDebugByteCodes byt >> promptLoop (i + 1) (optimize p)
       | otherwise =
-          case getByteCodes p ["InterpreterLine" ++ show i] [text] of
-            Left  err -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop (i + 1) p
-            Right byt -> printDebugByteCodes byt >> promptLoop (i + 1) byt
+          liftIO (execute p ["InterpreterLine" ++ show i] [text])
+          >> promptLoop (i + 1) (optimize p)
     
+
     multiLinePrompt :: String -> InputT IO ()
     multiLinePrompt acc
       | acc `finishWith` "!end" = handleInput $ Just $ take (length acc - 4) acc

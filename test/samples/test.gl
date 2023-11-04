@@ -1,13 +1,7 @@
-fun isEven(nbr: int) -> bool
-{
-    if (nbr == 0) {
-        return true;
-    }
+!ml!ast
 
-    return not (isEven(nbr - 1, 5));
-}
+let x: int = 0;
 
-fun main(argv: string[]) -> int
-{
-    return 0;
-}
+let y: int = 5;
+
+!end

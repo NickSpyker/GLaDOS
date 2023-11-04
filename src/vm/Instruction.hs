@@ -31,7 +31,7 @@ data Data
   | Lt
   | Eq
   -- Functions
-  | Fun
+  | Fun   Insts
   deriving (Show, Eq)
 
 
@@ -40,14 +40,14 @@ data Instruction
   | Ret
   | Push        Data
   | JumpIfFalse Int
-  | PushArg     Int
+  | PushFromArg Int
   | SaveToEnv   String Insts
-  | CallFromEnv String
+  | PushFromEnv String
   deriving (Show, Eq)
 
 
-type Args    = Stack
-type Stack   = [Data]
-type Insts   = [Instruction]
-type Env     = [(String, Insts)]
-type Prog    = Env
+type Args  = [Data]
+type Stack = [Data]
+type Insts = [Instruction]
+type Prog  = [(String, Insts)]
+type Env   = [(String, Insts)]
