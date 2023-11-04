@@ -38,7 +38,8 @@ getBC = tryToParse parsers
 
     parsers :: [BcParser]
     parsers =
-      [ parseLiteral
+      [ parsePrintStack
+      , parseLiteral
       , parseOperation
       ]
 
@@ -110,3 +111,8 @@ parseOperation (Operator op x y : next) =
         ParserAST.Eq  -> Just (xi ++ yi ++ [Push  Instruction.Eq, Call], next)
     _ -> Nothing
 parseOperation _ = Nothing
+
+
+parsePrintStack :: BcParser
+parsePrintStack (Section [CallFun "stack" []] : next) = Just ([PrintStack], next)
+parsePrintStack _ = Nothing

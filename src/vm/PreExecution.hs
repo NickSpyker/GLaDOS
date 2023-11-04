@@ -27,7 +27,7 @@ managesEntryPoint prog = managesEntryPoint' $ last prog
 
 
 managesEntryPointForInterpreter :: Prog -> Insts -> MainProg
-managesEntryPointForInterpreter prog main = (main ++ [Push PrintTop, Call], handleProg [] prog)
+managesEntryPointForInterpreter prog main = (main ++ [PrintTop, Push $ Char '\n', PrintTop], handleProg [] prog)
 
 
 managesEntryPointCompiler :: Prog -> MainProg
