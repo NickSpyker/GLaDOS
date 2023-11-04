@@ -93,7 +93,7 @@ parseOperation :: BcParser
 parseOperation (Operator ParserAST.Not x _ : next) =
   case getBC [x] of
     Just (i, []) -> Just (i ++ [Push Instruction.Not, Call], next)
-    Nothing      -> Nothing
+    _            -> Nothing
 parseOperation (Operator op x y : next) =
   case (getBC [x], getBC [y]) of
     (Just (xi, []), Just (yi, [])) ->
@@ -108,6 +108,5 @@ parseOperation (Operator op x y : next) =
         ParserAST.Gt  -> Just (xi ++ yi ++ [Push  Instruction.Gt, Call], next)
         ParserAST.Lt  -> Just (xi ++ yi ++ [Push  Instruction.Lt, Call], next)
         ParserAST.Eq  -> Just (xi ++ yi ++ [Push  Instruction.Eq, Call], next)
-        _             -> Nothing
     _ -> Nothing
 parseOperation _ = Nothing

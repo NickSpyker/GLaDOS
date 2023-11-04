@@ -32,12 +32,17 @@ data Data
   | Eq
   -- Functions
   | Fun   Insts
+  -- System
+  | PrintTop
+  | PrintArray
+  | PrintAll
   deriving (Show, Eq)
 
 
 data Instruction
   = Call
   | Ret
+  | Exit        Int
   | Push        Data
   | JumpIfFalse Int
   | PushFromArg Int

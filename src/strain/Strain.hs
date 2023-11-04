@@ -1,4 +1,4 @@
-module Strain (getTokens, getBlockExpr, getAst, getByteCodes, execute) where
+module Strain (getTokens, getBlockExpr, getAst, getByteCodes, joinBytecode, execute) where
 
 
 import ParserAST (buildASTtree, Ast(..))
@@ -47,8 +47,12 @@ getByteCodes progAcc ps is =
         Right  wrongAst         -> Left $ "<invalid ast output> #" ++ show wrongAst ++ "#"
 
 
+joinBytecode :: Prog -> [String] -> [String] -> Either String Prog
+joinBytecode prog paths inputs = getByteCodes (optimize prog) paths inputs
+
+
 execute :: Prog -> [String] -> [String] -> IO ()
 execute prog paths inputs =
-  case getByteCodes (optimize prog) paths inputs of
+  case joinBytecode prog paths inputs of
     Left err -> putStrLn err
     Right by -> run by

@@ -1,7 +1,7 @@
 module PreExecution (MainProg, optimize, managesEntryPoint) where
 
 
-import Instruction (Instruction(..), Insts, Prog)
+import Instruction (Instruction(..), Data(..), Insts, Prog)
 import Data.List (isPrefixOf)
 
 
@@ -11,7 +11,7 @@ type MainProg = (Insts, Prog)
 optimize :: Prog -> Prog
 optimize prog =
     case managesEntryPoint prog of
-        (_, prog) -> prog
+        (_, p) -> p
 
 
 managesEntryPoint :: Prog -> MainProg
@@ -27,7 +27,7 @@ managesEntryPoint prog = managesEntryPoint' $ last prog
 
 
 managesEntryPointForInterpreter :: Prog -> Insts -> MainProg
-managesEntryPointForInterpreter prog main = (main, handleProg [] prog)
+managesEntryPointForInterpreter prog main = (main ++ [Push PrintTop, Call], handleProg [] prog)
 
 
 managesEntryPointCompiler :: Prog -> MainProg
