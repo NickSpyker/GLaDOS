@@ -25,6 +25,7 @@ data Data
   | Div
   | Mod
   | And
+  | Not
   | Or
   | Gt
   | Lt
