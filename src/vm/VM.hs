@@ -29,7 +29,7 @@ getNewProg = buildEnv
 
 buildEnv :: Prog -> Env
 buildEnv [] = []
-buildEnv ((_, insts) : next) = (buildEnv' insts) ++ (buildEnv next)
+buildEnv ((_, insts) : next) = buildEnv' insts ++ buildEnv next
   where
     buildEnv' :: Insts -> Env
     buildEnv' [] = []
@@ -57,6 +57,7 @@ execute env args (Call       :  ine) (o : sne)        =
   case call o sne of
     Left  err      -> putStrLn $ "Error: " ++ err
     Right newStack -> execute env args ine newStack
+execute env args (SaveToEnv n i : next) stack = execute ((n, i) : env) args next stack
 execute _ _ _ _ = return ()
 
 
@@ -95,7 +96,7 @@ call op  (Float   x : Float y : next) =
       Sub -> Right (-)
       Mul -> Right (*)
       Div -> Right (/)
-      Mod -> Right (\ a b -> a - (intToFloat (floor (a / b))) * b)
+      Mod -> Right (\ a b -> a - intToFloat (floor (a / b)) * b)
       _   -> Left $ "invalid operator " ++ show op ++ " for two integer " ++ show x ++ " and " ++ show y
     intToFloat :: Int -> Float
     intToFloat = fromIntegral
@@ -105,4 +106,4 @@ call Or  (Bool x : Bool y : next) = Right $ Bool (x || y) : next
 call Not (Bool x :          next) = Right $ Bool (not  x) : next
 call Not (x :     _) = Left $ "invalid operation Not for " ++ show x
 call op  (x : y : _) = Left $ "invalid operation " ++ show op ++ " for " ++ show x ++ " and " ++ show y
-call _   _           = Left $ "invalid operation, need arguments"
+call _   _           = Left "invalid operation, need arguments"

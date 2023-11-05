@@ -35,7 +35,7 @@ promptLoop :: Int -> Prog -> InputT IO ()
 promptLoop i p = getInputLine ("GλaDOS/" ++ nbrToFormatString i ++ "> ") >>= handleInput
   where
     handleInput :: Maybe String -> InputT IO ()
-    handleInput  Nothing     = outputStrLn "\nLeaving GLaDOS"
+    handleInput  Nothing     = outputStrLn "\nLeaving GλaDOS"
     handleInput (Just input) = handleInput' $ trim input
 
     handleInput' :: String -> InputT IO ()

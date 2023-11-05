@@ -41,6 +41,7 @@ getBC = tryToParse parsers
       [ parsePrintStack
       , parseLiteral
       , parseOperation
+      , parseVarBinding
       ]
 
 
@@ -52,7 +53,7 @@ parseLiteral (Value (LitString v) : next) = Just (Push ArrayStart : parseLiteral
   where
     parseLiteral' :: [Char] -> Insts
     parseLiteral' [     ] = [Push ArrayEnd]
-    parseLiteral' (c : n) = (Push (Char c) : parseLiteral' n)
+    parseLiteral' (c : n) = Push (Char c) : parseLiteral' n
 parseLiteral (Value (LitSChar  v) : next) =
   case getC v of
     Just c  -> Just ([Push $ Char c], next)
@@ -116,3 +117,11 @@ parseOperation _ = Nothing
 parsePrintStack :: BcParser
 parsePrintStack (Section [CallFun "stack" []] : next) = Just ([PrintStack], next)
 parsePrintStack _ = Nothing
+
+
+parseVarBinding :: BcParser
+parseVarBinding (Binding (Bound name _ value) : next) =
+  case getBC [value] of
+    Just (vv, []) -> Just ([SaveToEnv name vv], next)
+    _             -> Nothing
+parseVarBinding _ = Nothing
