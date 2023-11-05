@@ -1,7 +1,9 @@
-!ml!ast
+fun add(x: int, y: int) -> int
+{
+    x + y
+}
 
-let x: int = 0;
-
-let y: int = 5;
-
-!end
+fun main() -> void
+{
+    add(1, 2);
+}

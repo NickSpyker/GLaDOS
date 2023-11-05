@@ -25,14 +25,25 @@ run prog =
 
 optimizeProgram :: Prog -> Prog
 optimizeProgram [] = []
-optimizeProgram ((moduleName, SaveToEnv name code : _) : next) = (moduleName, [SaveToEnv name code]) : optimizeProgram next
-optimizeProgram (_ : next) = optimizeProgram next
+optimizeProgram ((moduleName, block) : next) =
+  case fetchAllFunction block of
+    []   -> optimizeProgram next
+    funs -> (moduleName, funs) : optimizeProgram next
+  where
+    fetchAllFunction :: Insts -> Insts
+    fetchAllFunction [] = []
+    fetchAllFunction (SaveToEnv name code : n) = SaveToEnv name code : fetchAllFunction n
+    fetchAllFunction (_                   : n) = fetchAllFunction n
 
 
 buildEnv :: Prog -> Env
 buildEnv [] = []
-buildEnv ((_, [SaveToEnv name code]) : next) = (name, code) : buildEnv next
-buildEnv (_ : next) = buildEnv next
+buildEnv ((_, ls) : next) = getAllFunctions ls ++ buildEnv next
+  where
+    getAllFunctions :: Insts -> Env
+    getAllFunctions [] = []
+    getAllFunctions (SaveToEnv name code : n) = (name, code) : getAllFunctions n
+    getAllFunctions (_                   : n) = getAllFunctions n
 
 
 --                       ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇

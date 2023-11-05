@@ -46,6 +46,5 @@ getByteCodes progAcc ps is =
         Right  wrongAst         -> Left $ "<invalid ast output> #" ++ show wrongAst ++ "#"
 
 
-
 execute :: Prog -> IO ()
 execute = run

@@ -34,7 +34,7 @@ managesEntryPointForInterpreter prog main
 
 
 managesEntryPointCompiler :: Prog -> MainProg
-managesEntryPointCompiler prog = ([PushFromEnv "main", Call], handleProg [] prog)
+managesEntryPointCompiler prog = ([PushFromEnv "main"], handleProg [] prog)
 
 
 handleProg :: Prog -> Prog -> Prog
