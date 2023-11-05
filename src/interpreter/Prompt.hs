@@ -2,8 +2,8 @@ module Prompt (launchPrompt) where
 
 
 import System.Console.Haskeline (runInputT, defaultSettings, historyFile, autoAddHistory, InputT, getInputLine, outputStrLn, outputStr)
-import DebugOutput (printDebugTokens, printDebugBlockExpression, printDebugAst, printDebugByteCodes, printDebugProg)
-import Strain (getTokens, getBlockExpr, getAst, getByteCodes, joinBytecode, execute)
+import DebugOutput (printDebugTokens, printDebugBlockExpression, printDebugAst, printDebugByteCodes, printDebugProg, printDebugEnv)
+import Strain (getTokens, getBlockExpr, getAst, getByteCodes, execute)
 import Lib (trim, finishWith, nbrToFormatString)
 import PreExecution (managesEntryPoint)
 import Control.Monad.IO.Class (liftIO)
@@ -13,7 +13,7 @@ import Paths_glados (version)
 import Data.List (isPrefixOf)
 import Instruction (Prog)
 import System.Info (os)
-import VM (getNewProg)
+import VM (optimizeProgram)
 
 
 launchPrompt :: Prog -> IO ()
@@ -43,6 +43,7 @@ promptLoop i p = getInputLine ("GλaDOS/" ++ nbrToFormatString i ++ "> ") >>= ha
     handleInput' "!help"  = printPromptHelp >> promptLoop (i + 1) p
     handleInput' "!exit"  = outputStrLn "\nLeaving GLaDOS"
     handleInput' "!clear" = clearScreen >> promptLoop (i + 1) p
+    handleInput' "!env"   = printDebugEnv p >> promptLoop (i + 1) p
     handleInput' text
       | "!ml" `isPrefixOf` text = multiLinePrompt $ drop 3 text
       | "!tokens "    `isPrefixOf` text =
@@ -66,11 +67,9 @@ promptLoop i p = getInputLine ("GλaDOS/" ++ nbrToFormatString i ++ "> ") >>= ha
             Left  err -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop i p
             Right prr -> printDebugProg (managesEntryPoint prr) >> promptLoop (i + 1) p
       | otherwise =
-          case joinBytecode p ["InterpreterLine" ++ show i] [text] of
-            Left  err  -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop i p
-            Right newP ->
-              liftIO (execute p ["InterpreterLine" ++ show i] [text])
-              >> promptLoop (i + 1) (getNewProg newP)
+          case getByteCodes p ["InterpreterLine" ++ show i] [text] of
+            Left  err -> outputStrLn ("\nError:\n  " ++ err ++ "\n") >> promptLoop i p
+            Right prg -> liftIO (execute prg) >> promptLoop (i + 1) (optimizeProgram prg)
     
 
     multiLinePrompt :: String -> InputT IO ()

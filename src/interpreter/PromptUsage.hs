@@ -17,4 +17,5 @@ printPromptHelp =
   >> outputStrLn "  !blockexpr  Show block expression of the input"
   >> outputStrLn "  !ast        Show AST tree of the input"
   >> outputStrLn "  !bytecode   Show bytecode of the input"
+  >> outputStrLn "  !env        Show bytecode environment"
   >> outputStrLn "  !prog       Show pre-processing bytecode\n"

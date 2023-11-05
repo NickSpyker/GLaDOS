@@ -1,4 +1,4 @@
-module VM (run, getNewProg) where
+module VM (run, optimizeProgram) where
 
 
 import PreExecution (managesEntryPoint)
@@ -23,18 +23,16 @@ run prog =
     (main, modules) -> execute (buildEnv modules) [] main []
 
 
-getNewProg :: Prog -> Prog
-getNewProg = buildEnv
+optimizeProgram :: Prog -> Prog
+optimizeProgram [] = []
+optimizeProgram ((moduleName, SaveToEnv name code : _) : next) = (moduleName, [SaveToEnv name code]) : optimizeProgram next
+optimizeProgram (_ : next) = optimizeProgram next
 
 
 buildEnv :: Prog -> Env
 buildEnv [] = []
-buildEnv ((_, insts) : next) = buildEnv' insts ++ buildEnv next
-  where
-    buildEnv' :: Insts -> Env
-    buildEnv' [] = []
-    buildEnv' (SaveToEnv name code : n) = (name, code) : buildEnv' n
-    buildEnv' (_ : n) = buildEnv' n
+buildEnv ((_, [SaveToEnv name code]) : next) = (name, code) : buildEnv next
+buildEnv (_ : next) = buildEnv next
 
 
 --                       ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇

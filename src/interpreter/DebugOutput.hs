@@ -1,4 +1,4 @@
-module DebugOutput (printDebugTokens, printDebugBlockExpression, printDebugAst, printDebugByteCodes, printDebugProg) where
+module DebugOutput (printDebugTokens, printDebugBlockExpression, printDebugAst, printDebugByteCodes, printDebugProg, printDebugEnv) where
 
 
 import System.Console.Haskeline (outputStr, outputStrLn, InputT)
@@ -44,3 +44,10 @@ printDebugProg :: (Insts, Prog) -> InputT IO ()
 printDebugProg (main, prog) =
   outputStrLn ("\nProgram:\n  " ++ show prog)
     >> outputStrLn ("\nMain:\n  " ++ show main ++ "\n")
+
+
+printDebugEnv :: [(String, Insts)] -> InputT IO ()
+printDebugEnv [] = return ()
+printDebugEnv ((name, code) : next) =
+  outputStrLn ("\nModule \"" ++ name ++ "\":\n  " ++ show code ++ "\n")
+  >> printDebugEnv next

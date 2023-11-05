@@ -33,4 +33,7 @@ launchInterpreter paths files =
 
 
 launchRunFile :: [String] -> [String] -> IO ()
-launchRunFile = execute []
+launchRunFile paths files =
+  case getByteCodes [] paths files of
+    Left  err -> putStrLn err
+    Right byc -> execute byc
