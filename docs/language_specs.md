@@ -1,3 +1,5 @@
+[↶back](../README.md)
+
 # Langage GλaDOS
 
 ## Bases
