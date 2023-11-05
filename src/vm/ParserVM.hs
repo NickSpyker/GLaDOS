@@ -42,6 +42,9 @@ getBC = tryToParse parsers
       , parseLiteral
       , parseOperation
       , parseVarBinding
+      , parseIdCall
+      , parseFunctionBinding
+      , parseFunctionCall
       ]
 
 
@@ -115,7 +118,20 @@ parseOperation _ = Nothing
 
 
 parsePrintStack :: BcParser
-parsePrintStack (Section [CallFun "stack" []] : next) = Just ([PrintStack], next)
+parsePrintStack (Section [CallFun "stack" code] : next) =
+  case build [PrintStack] code of
+    Just newInsts -> Just (newInsts, next)
+    Nothing       -> Nothing
+  where
+    build :: Insts -> [Ast] -> Maybe Insts
+    build acc [  ] = Just acc
+    build acc steps =
+      case getBC steps of
+        Just (inst, n) -> build (acc ++ addEverySteps inst) n
+        _              -> Nothing
+    addEverySteps :: Insts -> Insts
+    addEverySteps [     ] = []
+    addEverySteps (a : n) = [a, PrintStack] ++ addEverySteps n
 parsePrintStack _ = Nothing
 
 
@@ -125,3 +141,58 @@ parseVarBinding (Binding (Bound name _ value) : next) =
     Just (vv, []) -> Just ([SaveToEnv name vv], next)
     _             -> Nothing
 parseVarBinding _ = Nothing
+
+
+parseIdCall :: BcParser
+parseIdCall (CallId name : next) = Just ([PushFromEnv name], next)
+parseIdCall _ = Nothing
+
+
+parseFunctionBinding :: BcParser
+parseFunctionBinding (Binding (Function funName arguments _ body) : next) =
+  case handleFunction [] (formatArgs 0 arguments) body of
+    Nothing    -> Nothing
+    Just bytes -> Just ([SaveToEnv funName bytes], next)
+  where
+    formatArgs :: Int -> [AstBinding] -> [(String, Int)]
+    formatArgs _ [] = []
+    formatArgs i (Arg name _ : n) = (name, i) : formatArgs (i + 1) n
+    formatArgs i (_          : n) = formatArgs i n
+
+    handleFunction :: Insts -> [(String, Int)] -> [Ast] -> Maybe Insts
+    handleFunction insts _ []      = Just insts
+    handleFunction insts args code =
+      case getBC code of
+        Nothing           -> Nothing
+        Just (sec, other) -> handleFunction (insts ++ (handleArgCall args sec)) args other
+    
+    handleArgCall :: [(String, Int)] -> Insts -> Insts
+    handleArgCall _ [] = []
+    handleArgCall args (PushFromEnv maybeArg : n) =
+      case isArgs args maybeArg of
+        Nothing        -> PushFromEnv maybeArg : handleArgCall args n
+        Just subtitute -> subtitute            : handleArgCall args n
+    handleArgCall args (c : n) = c : handleArgCall args n
+    
+    isArgs :: [(String, Int)] -> String -> Maybe Instruction
+    isArgs [] _ = Nothing
+    isArgs ((argName, index) : n) ideName
+      | argName == ideName = Just $ PushFromArg index
+      | otherwise          = isArgs n ideName
+parseFunctionBinding _ = Nothing
+
+
+parseFunctionCall :: BcParser
+parseFunctionCall (Section [CallFun funName arguments] : next) = parseFunctionCall (CallFun funName arguments : next)
+parseFunctionCall (CallFun funName arguments : next) =
+  case parseArgumentsList [] arguments of
+    Nothing  -> Nothing
+    Just arg -> Just (arg ++ [PushFromEnv funName], next)
+  where
+    parseArgumentsList :: Insts -> [Ast] -> Maybe Insts
+    parseArgumentsList insts [        ] = Just insts
+    parseArgumentsList insts (a : n) =
+      case getBC [a] of
+        Just (i, []) -> parseArgumentsList (insts ++ i) n
+        _            -> Nothing
+parseFunctionCall _ = Nothing

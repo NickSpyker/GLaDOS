@@ -24,8 +24,9 @@ printArray acc _                   = printLoop acc
 
 
 printStack :: Stack -> IO ()
-printStack []           = return ()
-printStack (top : next) = putStr (show top) >> putStr " ┃ " >> printStack next
+printStack []           = putStrLn ""
+printStack [top]        = putStr (show top) >> putStrLn ""
+printStack (top : next) = putStr (show top) >> putStr " | " >> printStack next
 
 
 printData :: Data -> IO ()

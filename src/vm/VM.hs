@@ -53,10 +53,22 @@ execute env args (Push     v : next) stack            = execute env args next (v
 execute env args (Call       : next) (Fun insts : ns) = execute env [] insts [] >> execute env args next ns
 execute env args (Call       :  ine) (o : sne)        =
   case call o sne of
-    Left  err      -> putStrLn $ "Error: " ++ err
+    Left  err      -> putStrLn ("Error: " ++ err)
     Right newStack -> execute env args ine newStack
-execute env args (SaveToEnv n i : next) stack = execute ((n, i) : env) args next stack
+execute env args (SaveToEnv   n i  : next) stack = execute (env ++ [(n, i)]) args next stack
+execute env args (PushFromEnv name : next) stack =
+  case fetchEnv env name next of
+    Left  err      -> putStrLn err
+    Right newInsts -> execute env args newInsts stack
+execute env args (PushFromArg _ : next) stack = execute env args next stack
 execute _ _ _ _ = return ()
+
+
+fetchEnv :: Env -> String -> Insts -> Either String Insts
+fetchEnv ((envName, insts) : next) name oldInsts
+  | envName == name = Right $ insts ++ oldInsts
+  | otherwise       = fetchEnv next name oldInsts
+fetchEnv _ name _   = Left $ "Not in scope: " ++ name
 
 
 call :: Data -> Stack -> Either String Stack

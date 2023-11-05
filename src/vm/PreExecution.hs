@@ -27,7 +27,10 @@ managesEntryPoint prog = managesEntryPoint' $ last prog
 
 
 managesEntryPointForInterpreter :: Prog -> Insts -> MainProg
-managesEntryPointForInterpreter prog main = (main ++ [PrintTop, Push $ Char '\n', PrintTop], handleProg [] prog)
+managesEntryPointForInterpreter prog [  ] = ([PrintTop, Push $ Char '\n', PrintTop], handleProg [] prog)
+managesEntryPointForInterpreter prog main
+  | last main == PrintStack = (main, handleProg [] prog)
+  | otherwise = (main ++ [PrintTop, Push $ Char '\n', PrintTop], handleProg [] prog)
 
 
 managesEntryPointCompiler :: Prog -> MainProg
