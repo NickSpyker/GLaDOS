@@ -1,9 +1,4 @@
-fun add(x: int, y: int) -> int
-{
-    x + y
-}
-
 fun main() -> void
 {
-    add(1, 2);
+    println(1 + 2 * 5);
 }

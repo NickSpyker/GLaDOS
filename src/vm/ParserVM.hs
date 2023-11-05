@@ -43,6 +43,8 @@ getBC = tryToParse parsers
       , parseOperation
       , parseVarBinding
       , parseIdCall
+      , parsePrintFunction
+      , parsePrintLnFunction
       , parseFunctionBinding
       , parseFunctionCall
       ]
@@ -133,6 +135,22 @@ parsePrintStack (Section [CallFun "stack" code] : next) =
     addEverySteps [     ] = []
     addEverySteps (a : n) = [a, PrintStack] ++ addEverySteps n
 parsePrintStack _ = Nothing
+
+
+parsePrintLnFunction :: BcParser
+parsePrintLnFunction (Section [CallFun "println" code] : next) =
+  case getBC code of
+    Just (i, []) -> Just (i ++ [PrintTop, Push $ Char '\n' , PrintTop], next)
+    _            -> Nothing
+parsePrintLnFunction _ = Nothing
+
+
+parsePrintFunction :: BcParser
+parsePrintFunction (Section [CallFun "print" code] : next) =
+  case getBC code of
+    Just (i, []) -> Just (i ++ [PrintTop], next)
+    _            -> Nothing
+parsePrintFunction _ = Nothing
 
 
 parseVarBinding :: BcParser
