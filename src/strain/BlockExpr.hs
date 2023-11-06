@@ -1,4 +1,4 @@
-module BlockExpr (BExpr(..), tokensToBlock) where
+module BlockExpr (BExpr(..), tokensToBlock, handleSection) where
 
 
 import Lexer (Token(..))

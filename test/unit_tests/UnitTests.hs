@@ -1,6 +1,21 @@
 import LexerTest (testTokenize)
 import BlockExprTest (testToBlock)
-import ParserASTTest(testParse)
+import ParserASTTest(testParse,
+                    testParseNumberOperation, 
+                    testParseBooleanOperation, 
+                    testParseAST, 
+                    testParseCmpOperation,
+                    testParseInPrth,
+                    testParseArray,
+                    testParseBound,
+                    testParseIncrAndBound,
+                    testParseStruct,
+                    testParseEnum,
+                    testParseTypeDecl,
+                    testParseIf,
+                    testParseReturn,
+                    testParseFunctionCall
+                    )
 import Test.HUnit
 
 indicatorFunction :: Int -> Int
@@ -13,7 +28,21 @@ tests =
     [
       testTokenize,
       testToBlock,
-      testParse
+      testParse,
+      testParseNumberOperation,
+      testParseAST,
+      testParseBooleanOperation,
+      testParseCmpOperation,
+      testParseInPrth,
+      testParseArray,
+      testParseBound,
+      testParseIncrAndBound,
+      testParseStruct,
+      testParseEnum,
+      testParseTypeDecl,
+      testParseIf,
+      testParseReturn,
+      testParseFunctionCall
     ]
 
 main :: IO Counts
