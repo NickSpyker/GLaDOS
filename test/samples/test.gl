@@ -1,13 +1,4 @@
-fun isEven(nbr: int) -> bool
+fun main() -> void
 {
-    if (nbr == 0) {
-        return true;
-    }
-
-    return not (isEven(nbr - 1, 5));
-}
-
-fun main(argv: string[]) -> int
-{
-    return 0;
+    println(1 + 2 * 5);
 }

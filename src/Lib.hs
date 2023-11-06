@@ -1,4 +1,4 @@
-module Lib (readToString, getFilesContent, haveElemOf, rmOcc, isNumber, isNumberOrDot, extractBtwQuot, trim, finishWith) where
+module Lib (readToString, getFilesContent, haveElemOf, rmOcc, isNumber, isNumberOrDot, extractBtwQuot, trim, finishWith, nbrToFormatString) where
 
 
 import Control.Exception (catch, IOException)
@@ -78,3 +78,10 @@ finishWith str pattern = finishWith' (reverse str) $ reverse pattern
   where
     finishWith' :: String -> String -> Bool
     finishWith' rstr rpattern = rpattern `isPrefixOf` rstr
+
+
+nbrToFormatString :: Int -> String
+nbrToFormatString n
+  | n < 10  = "00" ++ show n
+  | n < 100 = "0"  ++ show n
+  | otherwise      = show n

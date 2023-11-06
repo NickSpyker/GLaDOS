@@ -1,4 +1,6 @@
-module ParserAST (buildASTtree, parseNumberOperation, Ast(..), Control(..), Operator(..)) where
+module ParserAST (buildASTtree, Ast(..), Control(..), Operator(..), AstType(..), AstBinding(..)) where
+
+
 import BlockExpr (BExpr(..))
 import Data (Literal(..))
 import Lexer (Token(..))
@@ -120,6 +122,8 @@ parseSection _ _ = Nothing
 
 
 parseNumberOperation :: AstParser
+parseNumberOperation [] (T TokSub : T (TokLit (LitInt   nbr)) : next) = Just ([Value (LitInt   (-nbr))], next)
+parseNumberOperation [] (T TokSub : T (TokLit (LitFloat nbr)) : next) = Just ([Value (LitFloat (-nbr))], next)
 parseNumberOperation [] _ = Nothing
 parseNumberOperation acc (T op : y : T mop : next)
   | isPriorOp op && isPriorOp mop =
@@ -159,7 +163,6 @@ parseNumberOperation acc (T op : y : next) =
         TokMod -> Just (init acc ++ [Operator Mod (last acc) yv], next)
         _      -> Nothing
 parseNumberOperation _ _ = Nothing
-
 
 parseBooleanOperation :: AstParser
 parseBooleanOperation acc (T op : y : next) =

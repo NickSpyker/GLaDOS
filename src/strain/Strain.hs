@@ -1,9 +1,12 @@
-module Strain (getTokens, getBlockExpr, getAst) where
+module Strain (getTokens, getBlockExpr, getAst, getByteCodes, execute) where
 
 
+import ParserAST (buildASTtree, Ast(..))
 import BlockExpr (tokensToBlock, BExpr)
-import ParserAST (buildASTtree, Ast)
 import Lexer (tokenize, Token)
+import ParserVM (toByteCodes)
+import Instruction (Prog)
+import VM (run)
 
 
 getTokens :: String -> Either String [Token]
@@ -22,3 +25,26 @@ getAst path input =
   case getBlockExpr path input of
     Left  err   -> Left err
     Right bexpr -> buildASTtree bexpr
+
+
+getByteCodes :: Prog -> [String] -> [String] -> Either String Prog
+getByteCodes progAcc ps is =
+  case buildAstProgram [] ps is of
+    Left  err -> Left err
+    Right pro ->
+      case toByteCodes pro of
+        Left  err -> Left err
+        Right vpr -> Right $ progAcc ++ vpr
+  where
+    buildAstProgram :: [Ast] -> [String] -> [String] -> Either String Ast
+    buildAstProgram acc _ [] = Right $ Program acc
+    buildAstProgram acc [] _ = Right $ Program acc
+    buildAstProgram acc (path : paths) (input : inputs) =
+      case getAst path input of
+        Left   err              -> Left err
+        Right (Module name ast) -> buildAstProgram (acc ++ [Module name ast]) paths inputs
+        Right  wrongAst         -> Left $ "<invalid ast output> #" ++ show wrongAst ++ "#"
+
+
+execute :: Prog -> IO ()
+execute = run

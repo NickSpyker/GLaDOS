@@ -106,7 +106,7 @@ parseAllToken (parser : next) input
         Nothing     -> parseAllToken next input
 
 
-parseBasicToken :: String -> Maybe (Token, String)
+parseBasicToken :: ParserLexer
 parseBasicToken ('%'  : next) = Just (TokMod, next)
 parseBasicToken ('('  : next) = Just (TokOpPrth,  next)
 parseBasicToken (')'  : next) = Just (TokClPrth,  next)
@@ -140,7 +140,7 @@ parseBasicToken ('='  : next) = Just (TokAsgn, next)
 parseBasicToken _ = Nothing
 
 
-parseWordToken :: String -> Maybe (Token, String)
+parseWordToken :: ParserLexer
 parseWordToken ('c' : 'o' : 'n' : 't' : 'i' : 'n' : 'u' : 'e' : next) = Just (TokContinue, next) -- <continue>
 parseWordToken ('f' : 'a' : 'l' : 's' : 'e' : next) = Just (TokLit (LitBool False), next) -- <false>
 parseWordToken ('s' : 't' : 'r' : 'i' : 'n' : 'g' : next) = Just (TokTyString, next) -- <string>
@@ -172,7 +172,7 @@ parseWordToken ('o' : 'r' : next) = Just (TokOr, next) -- <or>
 parseWordToken _ = Nothing
 
 
-parseLitToken :: String -> Maybe (Token, String)
+parseLitToken :: ParserLexer
 parseLitToken = parseLitToken' []
   where
     parseLitToken' :: String -> String -> Maybe (Token, String)
@@ -197,7 +197,7 @@ parseLitToken = parseLitToken' []
       | otherwise         = Nothing
 
 
-parseIdeToken :: String -> Maybe (Token, String)
+parseIdeToken :: ParserLexer
 parseIdeToken [] = Nothing
 parseIdeToken (c : next)
   | isAlphaNum c = parseIdeToken' [] (c : next)

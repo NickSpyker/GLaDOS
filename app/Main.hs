@@ -1,12 +1,14 @@
-module Main (main, handleArgs, launchInterpreter, launchCompiler) where
+module Main (main) where
 
 
 import Lib (getFilesContent, haveElemOf, rmOcc)
+import System.Directory (doesFileExist)
+import Strain (getByteCodes, execute)
 import System.Environment (getArgs)
 import Prompt (launchPrompt)
-import ParserAST (Ast(..))
 import Usage (printHelp)
-import Strain (getAst)
+import Build (save, load)
+import VM (run)
 
 
 main :: IO ()
@@ -16,35 +18,45 @@ main = getArgs >>= handleArgs
 handleArgs :: [String] -> IO ()
 handleArgs [] = launchInterpreter [] []
 handleArgs input
+  | input `haveElemOf` ["build"] =
+    getFilesContent (input `rmOcc` ["build"])
+      >>= either putStrLn (launchBuild (input `rmOcc` ["build"]))
+  | input `haveElemOf` ["run"] = launcheRun (input `rmOcc` ["run"]) 
   | input `haveElemOf` ["-h", "--help"] = printHelp
   | input `haveElemOf` ["-i", "--interpret"] =
       getFilesContent (input `rmOcc` ["-i", "--interpret"])
         >>= either putStrLn (launchInterpreter (input `rmOcc` ["-i", "--interpret"]))
   | otherwise =
-      getFilesContent input >>= either putStrLn (launchCompiler input)
-
-
-buildAstTree :: [String] -> [String] -> Either String Ast
-buildAstTree = buildAstTree' []
-  where
-    buildAstTree' :: [Ast] -> [String] -> [String] -> Either String Ast
-    buildAstTree' acc _ [] = Right $ Program acc
-    buildAstTree' acc (path : paths) (file : files) =
-      case getAst path file of
-        Left  err -> Left err
-        Right ast -> buildAstTree' (acc ++ [ast]) paths files
-    buildAstTree' _ _ _ = Left "unhandled error"
+      getFilesContent input
+        >>= either putStrLn (launchRunFile input)
 
 
 launchInterpreter :: [String] -> [String] -> IO ()
 launchInterpreter paths files =
-  case buildAstTree paths files of
+  case getByteCodes [] paths files of
     Left  err -> putStrLn err
-    Right ast -> launchPrompt ast
+    Right byc -> launchPrompt byc
 
 
-launchCompiler :: [String] -> [String] -> IO ()
-launchCompiler paths files =
-  case buildAstTree paths files of
+launchRunFile :: [String] -> [String] -> IO ()
+launchRunFile paths files =
+  case getByteCodes [] paths files of
     Left  err -> putStrLn err
-    Right ast -> print ast
+    Right byc -> execute byc
+
+
+launchBuild :: [String] -> [String] -> IO ()
+launchBuild paths files =
+  case getByteCodes [] paths files of
+    Left  err -> putStrLn err
+    Right byc -> save "gl.run" byc
+
+
+launcheRun :: [String] -> IO ()
+launcheRun [file] = doesFileExist file >>= maybeLaunche file
+  where
+    maybeLaunche :: String -> Bool -> IO ()
+    maybeLaunche f exist
+      | exist     = load f >>= run
+      | otherwise = putStrLn $ f ++ " does not exist (No such file or directory)"
+launcheRun _ = return ()

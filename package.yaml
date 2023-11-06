@@ -1,5 +1,5 @@
 name: glados
-version: 0.1.21
+version: 0.2.1
 
 dependencies:
   - base >= 4.7 && < 5
@@ -20,9 +20,12 @@ library:
     - src
     - src/vm
     - src/strain
+    - src/compiler
     - src/interpreter
   dependencies:
     - haskeline
+    - bytestring
+    - binary
 
 executables:
   glados-exe:
@@ -34,6 +37,7 @@ executables:
       - -with-rtsopts=-N
     dependencies:
       - glados
+      - directory
 
 tests:
   glados-test:
