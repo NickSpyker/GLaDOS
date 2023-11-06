@@ -117,6 +117,7 @@ parseAST accu ess = tryToParse accu ess parsers
       , parseSection
       , parseReturn
       , parseExprCall
+      , parseReBound
       ]
 
 
@@ -505,3 +506,11 @@ parseFunctionCall acc (T (TokIde funName) : Prths args : next) =
         Left  _  -> Nothing
         Right as -> getAstForEach (rgs ++ as) ne
 parseFunctionCall _ _ = Nothing
+
+
+parseReBound :: AstParser
+parseReBound acc (BSection (T (TokIde varName) : T TokAsgn : value) : next) =
+  case getAst value of
+    Right [nv] -> Just (acc ++ [Binding (ReBound varName nv)], next)
+    _          -> Nothing
+parseReBound _ _ = Nothing

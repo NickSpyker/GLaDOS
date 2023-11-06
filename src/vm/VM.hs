@@ -66,7 +66,10 @@ execute env args (Call       :  ine) (o : sne)        =
   case call o sne of
     Left  err      -> putStrLn ("Error: " ++ err)
     Right newStack -> execute env args ine newStack
-execute env args (SaveToEnv   n i  : next) stack = execute (env ++ [(n , i)]) args next stack
+execute env args (SaveToEnv n i : next) stack =
+  case optiEnvCallInVar [] env i of
+    Left  err  -> putStrLn err
+    Right newI -> execute (env ++ [(n, newI)]) args next stack
 execute env args (PushFromEnv name : next) stack =
   case fetchEnv (reverse env) name next of
     Left  err      -> putStrLn err
@@ -75,6 +78,15 @@ execute env args (PushFromArg _ : next) stack = execute env args next stack
 execute env args (JumpIfFalse n : next) (Bool False : stack) = execute env args (jumpInStack n next) stack
 execute env args (JumpIfFalse _ : next) (_          : stack) = execute env args next stack
 execute _ _ _ _ = return ()
+
+
+optiEnvCallInVar :: Insts -> Env -> Insts -> Either String Insts
+optiEnvCallInVar acc _ [] = Right acc
+optiEnvCallInVar acc env (PushFromEnv name : next) =
+  case fetchEnv (reverse env) name next of
+    Left  err     -> Left err
+    Right newNext -> optiEnvCallInVar acc env newNext
+optiEnvCallInVar acc env (i : next) = optiEnvCallInVar (acc ++ [i]) env next
 
 
 jumpInStack :: Int -> Insts -> Insts

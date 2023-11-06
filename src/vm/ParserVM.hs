@@ -48,6 +48,7 @@ getBC = tryToParse parsers
       , parseFunctionBinding
       , parseFunctionCall
       , parseIf
+      , parseReBound
       ]
 
 
@@ -234,3 +235,11 @@ parseIf (Control (If cond thenBlock elseBlock) : next) =
         _ -> Nothing
     _  -> Nothing
 parseIf _ = Nothing
+
+
+parseReBound :: BcParser
+parseReBound (Binding (ReBound varName value) : next) = 
+  case getBC [value] of
+    Just (vv, []) -> Just ([SaveToEnv varName vv], next)
+    _             -> Nothing
+parseReBound _ = Nothing

@@ -76,46 +76,50 @@ parseModuleName _ _ = Left "wrong module name format"
 
 
 parseBody :: Insts -> [Int] -> Either String (Insts, [Int])
+parseBody acc [] = Right (acc, [])
+parseBody acc (0:0:2:3:5:7:11:13:17:19:23:0:next) = Right (acc, next)
 parseBody acc (0:2:3:5:7:11:13:17:19:23:0:next) = Right (acc, next)
 parseBody acc [0,0] = Right (acc, [])
 parseBody acc bin =
     case parseInstruction bin of
-        Nothing     -> Left $ "cannot parse section in module,\n\nalredy have:\n" ++ show acc ++ "\n\nbin:\n" ++ show bin
-        Just (i, n) -> parseBody (acc ++ i) n
+        Left err     -> Left
+          $ "cannot parse section in module,\n\nalredy have:\n" ++ show acc ++ "\n\nbin:\n" ++ show bin ++ "\n\nloop error\n" ++ err
+        Right (i, n) -> parseBody (acc ++ i) n
 
 
-type BinParser = [Int] -> Maybe (Insts, [Int])
+type BinParser = [Int] -> Either String (Insts, [Int])
 
 
 parseInstruction :: BinParser
-parseInstruction (301 :        next) = Just ([Call],      next)
-parseInstruction (302 :        next) = Just ([Ret],       next)
-parseInstruction (303 :        next) = Just ([PrintTop],  next)
-parseInstruction (305 : code : next) = Just ([Exit code], next)
+parseInstruction (301 :        next) = Right ([Call],      next)
+parseInstruction (302 :        next) = Right ([Ret],       next)
+parseInstruction (303 :        next) = Right ([PrintTop],  next)
+parseInstruction (305 : code : next) = Right ([Exit code], next)
 parseInstruction (306 : next) =
     case getData next of
-        Nothing -> Nothing
-        Just (d, n) -> Just ([Push d], n)
-parseInstruction (307 : nb : next) = Just ([JumpIfFalse nb], next)
-parseInstruction (308 : nb : next) = Just ([PushFromArg nb], next)
+        Nothing -> Left $ "\n### faile getData ###\n " ++ show next
+        Just (d, n) -> Right ([Push d], n)
+parseInstruction (307 : nb : next) = Right ([JumpIfFalse nb], next)
+parseInstruction (308 : nb : next) = Right ([PushFromArg nb], next)
 parseInstruction (309 : next) =
     case fetchString [] next of
-        Nothing -> Nothing
+        Nothing -> Left $ "\n### faile fetchString ###\n " ++ show next
         Just (name, nn) ->
             case parseBody [] nn of
-                Left _ -> Nothing
-                Right (insts, nnn) -> Just ([SaveToEnv name insts], nnn)
+                Left err -> Left err
+                Right (insts, nnn) -> Right ([SaveToEnv name insts], nnn)
 parseInstruction (310 : next) =
     case fetchString [] next of
-        Nothing -> Nothing
-        Just (name, nn) -> Just ([PushFromEnv name], nn)
-parseInstruction _ = Nothing
+        Nothing -> Left $ "\n### fail fetchString ###\n " ++ show next
+        Just (name, nn) -> Right ([PushFromEnv name], nn)
+parseInstruction (_ : next) = parseBody [] next
+parseInstruction [] = Right ([], [])
 
 
 fetchString :: [Int] -> [Int] -> Maybe (String, [Int])
 fetchString acc (0 : next) = Just (intArratToString acc, next)
 fetchString acc (c : next) = fetchString (acc ++ [c]) next
-fetchString _ _ = Nothing
+fetchString acc next       = Just (intArratToString acc, next)
 
 
 getData :: [Int] -> Maybe (Data, [Int])
