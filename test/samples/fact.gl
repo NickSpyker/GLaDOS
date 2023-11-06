@@ -1,0 +1,13 @@
+fun main() -> void
+{
+    factorial(1);
+}
+
+fun factorial(nbr: int) -> int
+{
+    if (nbr == 0) {
+        1
+    } else {
+        factorial(nbr - 1) * nbr
+    }
+}

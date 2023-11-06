@@ -99,6 +99,7 @@ parseLiteral _ = Nothing
 
 
 parseOperation :: BcParser
+parseOperation (Section [Operator op x y] : next) = parseOperation (Operator op x y : next)
 parseOperation (Operator ParserAST.Not x _ : next) =
   case getBC [x] of
     Just (i, []) -> Just (i ++ [Push Instruction.Not, Call], next)
