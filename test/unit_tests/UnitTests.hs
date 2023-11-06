@@ -14,8 +14,20 @@ import ParserASTTest(testParse,
                     testParseTypeDecl,
                     testParseIf,
                     testParseReturn,
-                    testParseFunctionCall
+                    testParseFunctionCall,
+                    testParseFunction
                     )
+import LibTest (testReadToString,
+                testIsNumberOrDot,
+                testIsNumber,
+                testTrim,
+                testFinishWith,
+                testNbrToFormatString,
+                testReadToString,
+                testGetFilesContent,
+                testHaveElemOf,
+                testRmOcc,
+                testExtractBtwQuot)
 import Test.HUnit
 
 indicatorFunction :: Int -> Int
@@ -42,7 +54,19 @@ tests =
       testParseTypeDecl,
       testParseIf,
       testParseReturn,
-      testParseFunctionCall
+      testParseFunctionCall,
+      testReadToString,
+      testIsNumberOrDot,
+      testIsNumber,
+      testTrim,
+      testFinishWith,
+      testNbrToFormatString,
+      testReadToString   ,
+      testGetFilesContent,
+      testHaveElemOf,
+      testRmOcc,
+      testExtractBtwQuot,
+      testParseFunction
     ]
 
 main :: IO Counts

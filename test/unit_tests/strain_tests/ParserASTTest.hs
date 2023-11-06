@@ -12,7 +12,8 @@ module ParserASTTest (testParse,
                     testParseTypeDecl,
                     testParseIf,
                     testParseReturn,
-                    testParseFunctionCall
+                    testParseFunctionCall,
+                    testParseFunction
                     ) where
 import Lexer (Token (..))
 import Test.HUnit
@@ -372,26 +373,73 @@ testParseIncrAndBound =
  
   ]
 
--- testParseFunction :: Test
--- testParseFunction = 
---   TestList [
---     "Testing parseFunction with various types and arguments" 
---     ~: TestList [
---         -- Add test cases here following the provided pattern
---         "Testing function parsing with string return type and empty body"
---         ~: parseFunction [] [T TokFun, T (TokIde "stringFunction"), Prths [], T TokRetTy, T TokTyString, Braces []]
---         ~?= Just ([Binding $ Function "stringFunction" [] TyString []], []),
-        
---         "Testing function parsing with float return type and single argument"
---         ~: parseFunction [] [T TokFun, T (TokIde "floatFunction"), Prths [T (TokIde "arg1"), T TokCol, T TokTyFloat], T TokRetTy, T TokTyFloat, Braces []]
---         ~?= Just ([Binding $ Function "floatFunction" [Arg "arg1" TyFloat] TyFloat []], []),
-        
---         "Testing function parsing with int return type and multiple arguments"
---         ~: parseFunction [] [T TokFun, T (TokIde "intFunction"), Prths [T (TokIde "arg1"), T TokCol, T TokTyInt, T TokCom, T (TokIde "arg2"), T TokCol, T TokTyInt], T TokRetTy, T TokTyInt, Braces []]
---         ~?= Just ([Binding $ Function "intFunction" [Arg "arg1" TyInt, Arg "arg2" TyInt] TyInt []], [])
---         -- Add more test cases to cover the branches of parseFunction and parseArgs...
---       ]
---   ]
+testParseFunction :: Test
+testParseFunction =
+  TestList [
+    "Testing parseFunction with valid function with string return type"
+    ~: parseFunction [] [T TokFun, T (TokIde "foo"), Prths [], T TokRetTy, T TokTyString, Braces []]
+    ~?= Just ([Binding $ Function "foo" [] TyString []], []),
+
+    -- "Testing parseFunction with valid function with int return type and body"
+    -- ~: parseFunction [] [T TokFun, T (TokIde "bar"), Prths [], T TokRetTy, T TokTyInt, Braces [T (TokLit (LitInt 42))]]
+    -- ~?= Just ([Binding $ Function "bar" [] TyInt [Literal (LitInt 42)]], []),
+
+    "Testing parseFunction with no arguments and float return type"
+    ~: parseFunction [] [T TokFun, T (TokIde "baz"), Prths [], T TokRetTy, T TokTyFloat, Braces []]
+    ~?= Just ([Binding $ Function "baz" [] TyFloat []], []),
+
+    "Testing parseFunction with invalid token sequence"
+    ~: parseFunction [] [T TokFun, T (TokIde "invalid"), Prths [], T TokTyInt, Braces []]
+    ~?= Nothing,
+
+    "Testing parseFunction with incomplete token sequence"
+    ~: parseFunction [] [T TokFun, T (TokIde "incomplete"), Prths []]
+    ~?= Nothing,
+
+    "Testing parseFunction with void return type and single int array arg"
+    ~: parseFunction [] [T TokFun, T (TokIde "withArg"), Prths [T (TokIde "arg1"), T TokCol, T TokTyInt, Hooks []], T TokRetTy, T TokTyVoid, Braces []]
+    ~?= Just ([Binding $ Function "withArg" [Arg "arg1" (TyArray TyInt)] TyVoid []], []),
+
+    "Testing parseFunction with invalid argument type"
+    ~: parseFunction [] [T TokFun, T (TokIde "wrongArg"), Prths [T (TokIde "arg1"), T TokCol, T (TokIde "UnknownType")], T TokRetTy, T TokTyString, Braces []]
+    ~?= Nothing,
+
+    "Testing parseFunction with valid function with char return type and body" ~: 
+    parseFunction [] [T TokFun, T (TokIde "charFun"), Prths [], T TokRetTy, T TokTyChar, Braces [T (TokLit (LitChar 'a'))]] 
+    ~?= Just ([Binding $ Function "charFun" [] TyChar [Value (LitChar 'a')]], []),
+
+    "Testing parseFunction with valid function with int return type and body" ~: 
+    parseFunction [] [T TokFun, T (TokIde "intFun"), Prths [], T TokRetTy, T TokTyInt, Braces [T (TokLit (LitInt 42))]] 
+    ~?= Just ([Binding $ Function "intFun" [] TyInt [Value (LitInt 42)]], []),
+
+    "Testing parseFunction with valid function with bool return type and body" ~: 
+    parseFunction [] [T TokFun, T (TokIde "boolFun"), Prths [], T TokRetTy, T TokTyBool, Braces [T (TokLit (LitBool True))]] 
+    ~?= Just ([Binding $ Function "boolFun" [] TyBool [Value (LitBool True)]], []),
+
+    "Testing parseFunction with valid function with string array argument" ~:
+    parseFunction [] [T TokFun, T (TokIde "stringArrayFun"), Prths [T (TokIde "arg1"), T TokCol, T TokTyString, Hooks []], T TokRetTy, T TokTyVoid, Braces []]
+    ~?= Just ([Binding $ Function "stringArrayFun" [Arg "arg1" (TyArray TyString)] TyVoid []], []),
+
+    "Testing parseFunction with valid function with float array argument" ~:
+    parseFunction [] [T TokFun, T (TokIde "floatArrayFun"), Prths [T (TokIde "arg1"), T TokCol, T TokTyFloat, Hooks []], T TokRetTy, T TokTyVoid, Braces []]
+    ~?= Just ([Binding $ Function "floatArrayFun" [Arg "arg1" (TyArray TyFloat)] TyVoid []], []),
+
+    "Testing parseFunction with valid function with char array argument" ~:
+    parseFunction [] [T TokFun, T (TokIde "charArrayFun"), Prths [T (TokIde "arg1"), T TokCol, T TokTyChar, Hooks []], T TokRetTy, T TokTyVoid, Braces []]
+    ~?= Just ([Binding $ Function "charArrayFun" [Arg "arg1" (TyArray TyChar)] TyVoid []], []),
+
+    "Testing parseFunction with valid function with bool array argument" ~:
+    parseFunction [] [T TokFun, T (TokIde "boolArrayFun"), Prths [T (TokIde "arg1"), T TokCol, T TokTyBool, Hooks []], T TokRetTy, T TokTyVoid, Braces []]
+    ~?= Just ([Binding $ Function "boolArrayFun" [Arg "arg1" (TyArray TyBool)] TyVoid []], []),
+
+    "Testing parseFunction with invalid function with void array argument" ~:
+    parseFunction [] [T TokFun, T (TokIde "voidArrayFun"), Prths [T (TokIde "arg1"), T TokCol, T TokTyVoid, Hooks []], T TokRetTy, T TokTyVoid, Braces []]
+    ~?= Just ([Binding (Function "voidArrayFun" [Arg "arg1" (TyArray TyVoid)] TyVoid [])],[]),
+
+    "Testing parseFunction with wrong sequence after array type argument" 
+    ~: parseFunction [] [T TokFun, T (TokIde "brokenFun"), Prths [T (TokIde "arg"), T TokCol, T TokTyInt, Hooks [], T TokCom], T TokRetTy, T TokTyVoid, Braces []]
+    ~?= Nothing
+  ]
 
 testParseStruct :: Test
 testParseStruct = TestList [

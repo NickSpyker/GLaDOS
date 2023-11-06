@@ -52,3 +52,4 @@ tests:
     dependencies:
       - glados
       - HUnit
+      - directory
