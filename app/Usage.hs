@@ -4,7 +4,7 @@ module Usage (printHelp) where
 printHelp :: IO ()
 printHelp =
      putStrLn "USAGE"
-  >> putStrLn "    ./glados [-i FILE(S) | FILE(S) | build FILE(S) | run OBJFILE(S)]"
+  >> putStrLn "    ./glados [-i FILE(S) | FILE(S) | build FILE(S) | run FILE | show FILE]"
   >> putStrLn ""
   >> putStrLn "DESCRIPTION"
   >> putStrLn "    default              process FILE(S)"
