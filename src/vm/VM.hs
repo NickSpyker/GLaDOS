@@ -72,7 +72,15 @@ execute env args (PushFromEnv name : next) stack =
     Left  err      -> putStrLn err
     Right newInsts -> execute env args newInsts stack
 execute env args (PushFromArg _ : next) stack = execute env args next stack
+execute env args (JumpIfFalse n : next) (Bool False : stack) = execute env args (jumpInStack n next) stack
+execute env args (JumpIfFalse _ : next) (_          : stack) = execute env args next stack
 execute _ _ _ _ = return ()
+
+
+jumpInStack :: Int -> Insts -> Insts
+jumpInStack 0 insts = insts
+jumpInStack n (_ : next) = jumpInStack (n - 1) next
+jumpInStack _ [] = []
 
 
 fetchEnv :: Env -> String -> Insts -> Either String Insts

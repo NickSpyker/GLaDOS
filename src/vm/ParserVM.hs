@@ -47,6 +47,7 @@ getBC = tryToParse parsers
       , parsePrintLnFunction
       , parseFunctionBinding
       , parseFunctionCall
+      , parseIf
       ]
 
 
@@ -182,7 +183,7 @@ parseFunctionBinding (Binding (Function funName arguments _ body) : next) =
     handleFunction insts args code =
       case getBC code of
         Nothing           -> Nothing
-        Just (sec, other) -> handleFunction (insts ++ (handleArgCall args sec)) args other
+        Just (sec, other) -> handleFunction (insts ++ handleArgCall args sec) args other
     
     handleArgCall :: [(String, Int)] -> Insts -> Insts
     handleArgCall _ [] = []
@@ -214,3 +215,22 @@ parseFunctionCall (CallFun funName arguments : next) =
         Just (i, []) -> parseArgumentsList (insts ++ i) n
         _            -> Nothing
 parseFunctionCall _ = Nothing
+
+
+parseIf :: BcParser
+parseIf (Control (If cond thenBlock [Empty]) : next) =
+  case getBC [cond] of
+    Just (icond, []) ->
+      case getBC thenBlock of
+        Just (tb, []) -> Just (icond ++ [JumpIfFalse $ length tb] ++ tb, next)
+        _             -> Nothing
+    _  -> Nothing
+parseIf (Control (If cond thenBlock elseBlock) : next) =
+  case getBC [cond] of
+    Just (icond, []) ->
+      case (getBC thenBlock, getBC elseBlock) of
+        (Just (tb, []), Just (eb, [])) ->
+          Just (icond ++ [JumpIfFalse $ length tb + 2] ++ tb ++ [Push $ Bool False, JumpIfFalse $ length eb] ++ eb, next)
+        _ -> Nothing
+    _  -> Nothing
+parseIf _ = Nothing
