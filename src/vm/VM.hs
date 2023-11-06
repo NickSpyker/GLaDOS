@@ -66,9 +66,9 @@ execute env args (Call       :  ine) (o : sne)        =
   case call o sne of
     Left  err      -> putStrLn ("Error: " ++ err)
     Right newStack -> execute env args ine newStack
-execute env args (SaveToEnv   n i  : next) stack = execute (env ++ [(n, i)]) args next stack
+execute env args (SaveToEnv   n i  : next) stack = execute (env ++ [(n , i)]) args next stack
 execute env args (PushFromEnv name : next) stack =
-  case fetchEnv env name next of
+  case fetchEnv (reverse env) name next of
     Left  err      -> putStrLn err
     Right newInsts -> execute env args newInsts stack
 execute env args (PushFromArg _ : next) stack = execute env args next stack
