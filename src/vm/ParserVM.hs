@@ -1,8 +1,8 @@
 module ParserVM (toByteCodes) where
 
 
-import ParserAST (AstType(..), AstBinding(..), Operator(..), Control(..), Ast(..))
-import Instruction (Data(..), Instruction(..), Args, Stack, Insts, Env, Prog)
+import ParserAST (AstBinding(..), Operator(..), Control(..), Ast(..))
+import Instruction (Data(..), Instruction(..), Insts, Prog)
 import Data (Literal(..))
 
 
