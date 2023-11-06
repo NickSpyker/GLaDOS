@@ -1,6 +1,4 @@
-module ParserAST (buildASTtree, Ast(..), Control(..), Operator(..)) where
-
-
+module ParserAST (buildASTtree, parseNumberOperation, Ast(..), Control(..), Operator(..)) where
 import BlockExpr (BExpr(..))
 import Data (Literal(..))
 import Lexer (Token(..))
