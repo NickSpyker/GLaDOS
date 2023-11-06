@@ -18,6 +18,7 @@ main = getArgs >>= handleArgs
 handleArgs :: [String] -> IO ()
 handleArgs [] = launchInterpreter [] []
 handleArgs input
+  | input `haveElemOf` ["show"] = launchShow (input `rmOcc` ["show"])
   | input `haveElemOf` ["build"] =
     getFilesContent (input `rmOcc` ["build"])
       >>= either putStrLn (launchBuild (input `rmOcc` ["build"]))
@@ -29,6 +30,16 @@ handleArgs input
   | otherwise =
       getFilesContent input
         >>= either putStrLn (launchRunFile input)
+
+
+launchShow :: [String] -> IO ()
+launchShow [file] = doesFileExist file >>= showInByteCode file
+  where
+    showInByteCode :: String -> Bool -> IO ()
+    showInByteCode f exist
+      | exist     = load f >>= print
+      | otherwise = putStrLn $ f ++ " does not exist (No such file or directory)"
+launchShow _ = return ()
 
 
 launchInterpreter :: [String] -> [String] -> IO ()
