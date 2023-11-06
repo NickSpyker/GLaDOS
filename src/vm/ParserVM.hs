@@ -1,8 +1,8 @@
 module ParserVM (toByteCodes) where
 
 
-import ParserAST (AstType(..), AstBinding(..), Operator(..), Control(..), Ast(..))
-import Instruction (Data(..), Instruction(..), Args, Stack, Insts, Env, Prog)
+import ParserAST (AstBinding(..), Operator(..), Control(..), Ast(..))
+import Instruction (Data(..), Instruction(..), Insts, Prog)
 import Data (Literal(..))
 
 
@@ -99,6 +99,7 @@ parseLiteral _ = Nothing
 
 
 parseOperation :: BcParser
+parseOperation (Section [Operator op x y] : next) = parseOperation (Operator op x y : next)
 parseOperation (Operator ParserAST.Not x _ : next) =
   case getBC [x] of
     Just (i, []) -> Just (i ++ [Push Instruction.Not, Call], next)

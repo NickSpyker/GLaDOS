@@ -10,5 +10,6 @@ printHelp =
   >> putStrLn "    default              process FILE(S)"
   >> putStrLn "    build                compile FILE(S)"
   >> putStrLn "    run                  run compiled OBJFILE(S)"
+  >> putStrLn "    show                 display in a human-readable binary format"
   >> putStrLn "    -h or --help         show this message"
   >> putStrLn "    -i or --interpret    interpret with FILE(S) input"

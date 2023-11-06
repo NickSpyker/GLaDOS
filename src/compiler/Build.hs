@@ -158,7 +158,7 @@ buildFloat x y = buildFloat' (fromIntegral x) (fromIntegral y)
 
 splitFloat :: Float -> (Int, Int)
 splitFloat f =
-  let (intPart, fracPart) = properFraction f
+  let (intPart, fracPart) = properFraction f -- | This warning is normal
       intStr = show intPart
       fracStr = drop 2 $ show fracPart
   in (read intStr, read fracStr)
