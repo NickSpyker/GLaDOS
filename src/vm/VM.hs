@@ -46,8 +46,7 @@ buildEnv ((_, ls) : next) = getAllFunctions ls ++ buildEnv next
     getAllFunctions (_                   : n) = getAllFunctions n
 
 
---                       ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇
---                       ┃ 🎵 STACK MACHINE 🎵 ┃
+--                            STACK MACHINE     
 -- ▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇
 -- ┃ Env:   Environment is used to store variables and functions     ┃
 -- ┃ Args:  Arguments are literals available when calling a function ┃
